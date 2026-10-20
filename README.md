@@ -166,16 +166,35 @@ one click from any music or video page sends it to Platine.
 
 ## Kubernetes
 
-The chart lives in [`charts/platine`](charts/platine/README.md). To push the image and install it:
+The chart lives in [`charts/platine`](charts/platine/README.md) and each release publishes it to GHCR:
 
 ```bash
-make push TAG=2.0.0             # ghcr.io/baptgosse/platine:2.0.0
-make helm-install TAG=2.0.0
+helm install platine oci://ghcr.io/baptgosse/charts/platine -n platine --create-namespace
+```
+
+To deploy your own build instead:
+
+```bash
+make push TAG=dev               # ghcr.io/baptgosse/platine:dev
+make helm-install TAG=dev
 ```
 
 The chart offers an Ingress or an HTTPRoute (Gateway API), a NetworkPolicy that blocks internal addresses
 (Platine downloads arbitrary links), a ServiceMonitor, and authentication and cookies from Secrets.
 Conversions are kept in memory: stay at **one replica**.
+
+## Releases
+
+Every push on `main` that passes CI is a release, numbered automatically: the last tag plus one patch
+(2.0.0, 2.0.1, 2.0.2...). CI then publishes:
+
+- the image `ghcr.io/baptgosse/platine` with the tags `2.0.2`, `2.0` and `latest`;
+- the Helm chart `oci://ghcr.io/baptgosse/charts/platine` in version 2.0.2;
+- the `v2.0.2` tag and its [GitHub release](https://github.com/BaptGosse/Platine/releases), with the changes,
+  the chart package and the SBOM of the image (CycloneDX).
+
+For a new minor or major version, run `make version VERSION=2.1.0` and commit: the next push on `main`
+releases 2.1.0, then 2.1.1 and so on. The version is stamped at build time, CI never commits.
 
 ## Settings
 
@@ -217,9 +236,9 @@ make fmt                # fixes the style
   finding is listed with its reason in `.trivyignore` and `trivy-secret.yaml`. The image drops pip and applies
   the Debian security updates at build time.
 - **CI**: every push runs all of the above, validates the chart with kubeconform, sends the full Trivy reports
-  to the GitHub Security tab, publishes the coverage reports to <https://baptgosse.github.io/Platine/>, pushes
-  the image to GHCR from `main` once it passed the scan, and publishes the chart as an OCI artifact on each
-  `v*` tag.
+  to the GitHub Security tab, publishes the coverage reports to <https://baptgosse.github.io/Platine/>, and
+  on `main` releases the image (once it passed the scan), the chart and a GitHub release (see
+  [Releases](#releases)).
 
 ### When a site breaks
 

@@ -3,10 +3,9 @@
 FROM docker.io/library/python:3.14-slim
 
 LABEL org.opencontainers.image.title="Platine" \
-      org.opencontainers.image.description="Paste a link, get a 320 kbps MP3: YouTube, YouTube Music, SoundCloud, Spotify and hundreds of other sites (yt-dlp + ffmpeg)" \
+      org.opencontainers.image.description="Platine: paste a link, get a 320 kbps MP3: YouTube, YouTube Music, SoundCloud, Spotify and hundreds of other sites (yt-dlp + ffmpeg)" \
       org.opencontainers.image.source="https://github.com/BaptGosse/Platine" \
       org.opencontainers.image.url="https://github.com/BaptGosse/Platine" \
-      org.opencontainers.image.version="2.0.0" \
       org.opencontainers.image.licenses="MIT"
 
 COPY --from=ghcr.io/astral-sh/uv:0.13.3 /uv /uvx /bin/
@@ -48,8 +47,12 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 COPY README.md ./
 COPY platine ./platine
+# Release version, given by CI. Stamped this late so the dependency layer above stays cached.
+ARG VERSION=
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev
+    if [ -n "$VERSION" ]; then sed -i "s/^version = \".*\"/version = \"$VERSION\"/" pyproject.toml; fi \
+    && uv sync --frozen --no-dev
+LABEL org.opencontainers.image.version="${VERSION:-dev}"
 
 USER 10001:10001
 EXPOSE 8320

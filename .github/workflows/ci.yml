@@ -1,15 +1,16 @@
 name: Platine CI
 
+# Every push on main that passes CI is released: image, Helm chart, tag and GitHub release.
 on:
   push:
     branches: [main]
-    tags: ["v*"]
   pull_request:
   workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # On main, runs queue up instead: a release is never cut in half.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 permissions:
   contents: read
@@ -21,6 +22,46 @@ env:
   KUBERNETES_VERSION: "1.33.0"
 
 jobs:
+  version:
+    name: Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.next.outputs.version }}
+      minor: ${{ steps.next.outputs.minor }}
+      release: ${{ steps.next.outputs.release }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      # Patches are automatic: last tag + 1. For a new minor or major, raise the version in
+      # pyproject.toml (`make version VERSION=2.1.0`): it becomes the next release.
+      - name: Next version
+        id: next
+        env:
+          ON_MAIN: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+        run: |
+          base=$(sed -n 's/^version = "\(.*\)"$/\1/p' pyproject.toml)
+          last=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-version:refname | head -n 1)
+          last=${last#v}
+          current=$(git tag --points-at HEAD --list 'v[0-9]*.[0-9]*.[0-9]*' | head -n 1)
+          release=$ON_MAIN
+          if [ -n "$current" ]; then
+            # This commit is already released (run started again by hand).
+            version=${current#v}
+            release=false
+          elif [ -z "$last" ] || [ "$(printf '%s\n' "$base" "$last" | sort -V | tail -n 1)" != "$last" ]; then
+            version=$base
+          else
+            IFS=. read -r major minor patch <<<"$last"
+            version="$major.$minor.$((patch + 1))"
+          fi
+          {
+            echo "version=$version"
+            echo "minor=${version%.*}"
+            echo "release=$release"
+          } >> "$GITHUB_OUTPUT"
+          echo "### Platine $version (release: $release)" >> "$GITHUB_STEP_SUMMARY"
+
   python:
     name: Python (ruff, mypy, pylint, tests, coverage)
     runs-on: ubuntu-latest
@@ -215,14 +256,15 @@ jobs:
 
   image:
     name: Container image (build, Trivy scan, push)
-    needs: [python, js, helm]
+    needs: [version, python, js, helm, security]
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
       security-events: write
     env:
-      PUSH: ${{ github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
+      PUSH: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+      VERSION: ${{ needs.version.outputs.version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
@@ -233,8 +275,8 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=${{ needs.version.outputs.version }},enable=${{ needs.version.outputs.release == 'true' }},priority=1000
+            type=raw,value=${{ needs.version.outputs.minor }},enable=${{ needs.version.outputs.release == 'true' }}
             type=sha
             type=raw,value=latest,enable={{is_default_branch}}
       # Built and scanned first: an image with a fixable HIGH or CRITICAL issue is never pushed.
@@ -244,6 +286,7 @@ jobs:
           context: .
           load: true
           tags: platine:scan
+          build-args: VERSION=${{ env.VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567 # v0.3.1
@@ -274,18 +317,21 @@ jobs:
         with:
           context: .
           push: true
+          build-args: VERSION=${{ env.VERSION }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
 
-  chart-release:
+  chart:
     name: Publish Helm chart
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: [image]
+    if: needs.version.outputs.release == 'true'
+    needs: [version, image]
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
@@ -293,9 +339,65 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          version="${GITHUB_REF_NAME#v}"
           owner="${GITHUB_REPOSITORY_OWNER,,}"
           echo "$GH_TOKEN" | helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
-          # The chart takes the tag as its version, and defaults to the image pushed just before.
-          helm package charts/platine --version "$version" --app-version "$version" --destination dist
-          helm push "dist/platine-$version.tgz" "oci://ghcr.io/$owner/charts"
+          # The chart takes the release version, and defaults to the image pushed just before.
+          helm package charts/platine --version "$VERSION" --app-version "$VERSION" --destination dist
+          helm push "dist/platine-$VERSION.tgz" "oci://ghcr.io/$owner/charts"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: helm-chart
+          path: dist
+          if-no-files-found: error
+
+  release:
+    name: GitHub release
+    if: needs.version.outputs.release == 'true'
+    needs: [version, chart]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: helm-chart
+          path: dist
+      - uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567 # v0.3.1
+        with:
+          version: ${{ env.TRIVY_VERSION }}
+          cache: true
+      - name: SBOM of the published image (CycloneDX)
+        run: >-
+          trivy image --format cyclonedx --output "dist/platine-$VERSION.sbom.cdx.json"
+          "ghcr.io/${GITHUB_REPOSITORY,,}:$VERSION"
+      - name: Release notes
+        run: |
+          previous=$(git describe --tags --abbrev=0 --match 'v[0-9]*' HEAD 2>/dev/null || true)
+          {
+            echo "## Changes"
+            echo
+            git log --no-merges --format='- %s' "${previous:+$previous..}HEAD"
+            echo
+            echo "## Install"
+            echo
+            echo '```bash'
+            echo "podman run --rm -p 8320:8320 ghcr.io/${GITHUB_REPOSITORY,,}:$VERSION"
+            echo "helm install platine oci://ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts/platine --version $VERSION"
+            echo '```'
+            if [ -n "$previous" ]; then
+              echo
+              echo "**Full changelog**: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/compare/$previous...v$VERSION"
+            fi
+          } > notes.md
+      # Creates the vX.Y.Z tag on this commit. Tags made with GITHUB_TOKEN start no new run.
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          gh release create "v$VERSION" dist/*
+          --target "$GITHUB_SHA" --title "Platine $VERSION" --notes-file notes.md

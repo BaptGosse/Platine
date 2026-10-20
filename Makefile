@@ -30,7 +30,7 @@ endif
 .DEFAULT_GOAL := help
 .PHONY: help install dev test test-network test-js lint fmt typecheck check update-ytdlp \
 	    coverage coverage-python coverage-js coverage-badges \
-	    image run up down logs push scan scan-image helm-lint helm-template helm-install
+	    image run up down logs push scan scan-image version helm-lint helm-template helm-install
 
 help: ## Show this help
 	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "  \033[1m%-16s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -137,6 +137,16 @@ scan-image: image ## Scan the image for known vulnerabilities and secrets (Trivy
 	@rm -rf .scan && mkdir .scan && trap 'rm -rf .scan' EXIT && \
 	    $(CONTAINER) save -q -o .scan/image.tar $(IMAGE):$(TAG) && \
 	    $(TRIVY) image --config trivy.yaml --scanners vuln,secret --input .scan/image.tar
+
+# --- Release -----------------------------------------------------------------
+
+# Every push on main that passes CI is released as the last tag + 1 (patch). This target only
+# raises the base for a new minor or major: commit it, the next push on main releases it.
+version: ## Set the next release to VERSION, for a minor or major bump (make version VERSION=2.1.0)
+	@echo "$(VERSION)" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$$' || { echo "Usage: make version VERSION=x.y.z"; exit 1; }
+	sed -i 's/^version = ".*"/version = "$(VERSION)"/' pyproject.toml
+	sed -i -e 's/^version: .*/version: $(VERSION)/' -e 's/^appVersion: .*/appVersion: "$(VERSION)"/' $(CHART)/Chart.yaml
+	$(UV) lock
 
 # --- Kubernetes --------------------------------------------------------------
 
