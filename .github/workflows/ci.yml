@@ -55,7 +55,7 @@ jobs:
         run: uv run python scripts/coverage_gate.py --name Python coverage/python/lcov.info
       - name: Upload coverage report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-python
           path: coverage/python
@@ -95,7 +95,7 @@ jobs:
         run: python3 scripts/coverage_gate.py --name JS coverage/js/lcov.info
       - name: Upload coverage report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-js
           path: |
