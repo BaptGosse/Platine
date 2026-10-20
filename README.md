@@ -34,6 +34,15 @@ as 320 kbps MP3 files with title, artist, album and cover.</p>
 - **Production ready**: non-root read-only container, Helm chart, Prometheus metrics, optional password,
   cookies and proxy for picky sites.
 
+## Legal notice
+
+> [!WARNING]
+> Platine is a tool. You are solely responsible for how you use it, and the authors are not responsible for any
+> illegal use. Only download content you have the rights to: your own works, content whose license allows it,
+> or, where the law of your country provides a private copy exception, a personal copy of content you lawfully
+> own (for example music you bought). Downloading copyrighted content without permission is illegal in most
+> countries, and many sites, YouTube and Spotify included, forbid downloads in their terms of service.
+
 ## Stack
 
 <p align="center">
