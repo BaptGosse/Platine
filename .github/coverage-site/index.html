@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Platine test coverage</title>
+  <meta name="description" content="Test coverage reports for Platine, rebuilt on every push to main.">
+  <link rel="icon" href="mark.svg" type="image/svg+xml">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #be161e;
+      --ink: #ffffff;
+      --ink-soft: rgb(255 255 255 / 0.82);
+      --ink-faint: rgb(255 255 255 / 0.32);
+      --sticker: #ffe27a;
+      --sticker-ink: #6e0a0f;
+      --gutter: clamp(16px, 5vw, 48px);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #2a0709;
+        --ink: #fff1ef;
+        --ink-soft: rgb(255 241 239 / 0.74);
+        --ink-faint: rgb(255 241 239 / 0.22);
+        --sticker-ink: #2a0709;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font: 17px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    main {
+      max-width: 46rem;
+      margin: 0 auto;
+      padding: clamp(32px, 8vw, 96px) var(--gutter) 48px;
+    }
+    .logo { display: block; width: min(220px, 60vw); height: auto; }
+    h1 {
+      margin: 40px 0 8px;
+      font-size: clamp(2.2rem, 7vw, 3.6rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+    .lede { margin: 0 0 40px; max-width: 36rem; color: var(--ink-soft); }
+    ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink-faint); }
+    li {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px 20px;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--ink-faint);
+    }
+    li h2 { flex: 1 1 12rem; margin: 0; font-size: 1.35rem; letter-spacing: -0.01em; }
+    li h2 small { display: block; font-size: 0.85rem; font-weight: 400; color: var(--ink-soft); }
+    li img { height: 20px; }
+    .open {
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: var(--sticker);
+      color: var(--sticker-ink);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .open:hover { filter: brightness(1.05); }
+    a:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+    footer { margin-top: 32px; font-size: 0.9rem; color: var(--ink-soft); }
+    footer a { color: var(--ink); }
+  </style>
+</head>
+<body>
+  <main>
+    <img class="logo" src="logo-white.svg" alt="Platine">
+    <h1>Test coverage</h1>
+    <p class="lede">
+      Coverage of the Python backend and of the browser code, measured on every push to main.
+      CI fails when lines, functions or branches drop below 100 %.
+    </p>
+    <ul>
+      <li>
+        <h2>Python<small>Backend, API and command line</small></h2>
+        <img src="badges/python.svg" alt="Python coverage badge">
+        <a class="open" href="python/html/index.html">Open the Python report</a>
+      </li>
+      <li>
+        <h2>JavaScript<small>Interface logic, tested with Deno</small></h2>
+        <img src="badges/js.svg" alt="JavaScript coverage badge">
+        <a class="open" href="js/html/index.html">Open the JavaScript report</a>
+      </li>
+    </ul>
+    <footer>
+      Built from commit <a href="{{REPO_URL}}/commit/{{COMMIT}}">{{COMMIT_SHORT}}</a> on {{DATE}}.
+      <a href="{{REPO_URL}}">Source on GitHub</a>
+    </footer>
+  </main>
+</body>
+</html>

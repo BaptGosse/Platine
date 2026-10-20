@@ -1,0 +1,42 @@
+# Every option enabled: used by CI (helm lint + kubeconform).
+replicaCount: 1
+image:
+  repository: ghcr.io/baptgosse/platine
+  tag: "2.0.0"
+config:
+  proxy: http://proxy.example:3128
+auth:
+  enabled: true
+  password: ci-only
+cookies:
+  existingSecret: platine-cookies
+ingress:
+  enabled: true
+  className: traefik
+  hosts:
+    - host: platine.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: platine-tls
+      hosts:
+        - platine.example.com
+httpRoute:
+  enabled: true
+networkPolicy:
+  enabled: true
+  ingress:
+    from:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: monitoring
+metrics:
+  podAnnotations: true
+  serviceMonitor:
+    enabled: true
+    labels:
+      release: kube-prometheus-stack
+extraEnv:
+  - name: EXTRA
+    value: "1"

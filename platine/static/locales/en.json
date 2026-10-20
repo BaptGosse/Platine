@@ -1,0 +1,110 @@
+{
+  "meta": {
+    "description": "Paste a YouTube, SoundCloud or Spotify link and get a 320 kbps MP3 with title, artist and cover."
+  },
+  "header": {
+    "install": "Install the app",
+    "language": "Language"
+  },
+  "hero": {
+    "title": "Paste a link.",
+    "inputLabel": "Link to a track, video, playlist or album",
+    "convert": "Convert",
+    "analysing": "Analysing…",
+    "hint": "YouTube, YouTube Music, SoundCloud, Spotify, Bandcamp and hundreds of other sites. Playlists and albums welcome: the conversion starts as soon as you paste the link."
+  },
+  "crate": {
+    "label": "Your tracks",
+    "clearFinished": "Remove finished tracks",
+    "saveAll": "Save all (.zip)"
+  },
+  "group": {
+    "summary": "{{tracks}}, {{ready}}",
+    "tracks_one": "{{count}} track",
+    "tracks_other": "{{count}} tracks",
+    "ready_one": "{{count}} ready",
+    "ready_other": "{{count}} ready",
+    "allReady_one": "ready",
+    "allReady_other": "all ready"
+  },
+  "track": {
+    "analysing": "Analysing the link…",
+    "spotifySource": "Spotify, audio from YouTube Music"
+  },
+  "status": {
+    "queued": "Waiting",
+    "matching": "Searching YouTube Music",
+    "downloading": "Downloading",
+    "downloadingPercent": "Downloading {{percent}}",
+    "converting": "Converting to MP3 320 kbps",
+    "done": "Ready",
+    "doneSize": "Ready, {{size}}",
+    "failed": "The conversion failed.",
+    "cancelled": "Cancelled",
+    "expired": "File expired: start the conversion again"
+  },
+  "detail": {
+    "speed": "{{speed}}/s",
+    "until": "until {{time}}"
+  },
+  "actions": {
+    "save": "Save",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "cancelLabel": "Cancel the conversion",
+    "remove": "Remove",
+    "removeLabel": "Remove from the list"
+  },
+  "footer": {
+    "about": "320 kbps MP3 with title, artist and cover. Files stay available for {{ttl}} after the conversion. For Spotify, the details come from Spotify and the audio from YouTube Music.",
+    "shortcutBefore": "Shortcut: drag",
+    "bookmarklet": "Convert with Platine",
+    "shortcutAfter": "to your bookmarks bar, then click it from any music or video page."
+  },
+  "notices": {
+    "offline": "Offline. Your tracks stay here, conversions resume when you're back online.",
+    "update": "A new version of Platine is ready.",
+    "reload": "Reload"
+  },
+  "units": {
+    "size": "{{value}} {{unit}}",
+    "percent": "{{value}}%",
+    "B": "B",
+    "kB": "kB",
+    "MB": "MB",
+    "GB": "GB",
+    "hours_one": "{{value}} hour",
+    "hours_other": "{{value}} hours",
+    "minutes_one": "{{value}} minute",
+    "minutes_other": "{{value}} minutes"
+  },
+  "errors": {
+    "empty_input": "Paste a link first.",
+    "network": "Could not reach Platine: check your connection and try again.",
+    "server": "The server answered {{status}}.",
+    "unsupported_site": "This site is not supported, or the page has no audio or video.",
+    "invalid_url": "This link is not valid.",
+    "drm": "This media is DRM-protected and cannot be downloaded.",
+    "private": "This video is private.",
+    "age_restricted": "This media is age-restricted. Add cookies from a signed-in account (see the README).",
+    "bot_check": "YouTube is blocking this server with a bot check. Add cookies or a proxy (see the README).",
+    "live_not_started": "This live stream has not started yet.",
+    "unavailable": "This media is unavailable: removed, private or blocked in this country.",
+    "not_found": "Page not found (error 404). Check the link.",
+    "forbidden": "The site refused access (error 403).",
+    "unreachable": "Could not reach the page. Check the link and try again.",
+    "unexpected": "Unexpected error during the conversion.",
+    "not_a_link": "This is not a valid link: it must start with https://",
+    "live_not_supported": "Live streams are not supported: wait until the broadcast ends.",
+    "spotify_not_found": "This Spotify content was not found: is the link private or deleted?",
+    "spotify_unavailable": "Spotify did not respond properly. Try again in a moment.",
+    "spotify_unsupported": "Only Spotify tracks, albums and playlists are supported.",
+    "ytm_unavailable": "YouTube Music did not respond. Try again in a moment.",
+    "ytm_no_match": "Track not found on YouTube Music.",
+    "no_tracks": "No tracks found at this address.",
+    "queue_full": "Too many conversions are waiting: try again in a few minutes.",
+    "job_not_found": "Conversion not found.",
+    "file_gone": "This file is no longer available: start the conversion again.",
+    "archive_empty": "No finished file to put in the archive."
+  }
+}

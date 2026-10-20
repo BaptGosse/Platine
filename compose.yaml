@@ -1,0 +1,39 @@
+# Platine. Works with `podman compose up -d --build` as well as `docker compose up -d --build`.
+name: platine
+services:
+  platine:
+    image: localhost/platine:latest
+    build:
+      context: .
+    ports:
+      # Reachable from this machine only. Replace 127.0.0.1 with 0.0.0.0 to open it to the local network.
+      - "127.0.0.1:${PLATINE_PORT:-8320}:8320"
+    # Read-only filesystem: only /tmp (downloads, caches) is writable.
+    read_only: true
+    tmpfs:
+      - /tmp:rw,size=2g,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8320/healthz', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    environment:
+      PLATINE_MAX_CONCURRENT: "3"          # conversions running in parallel
+      PLATINE_FILE_TTL: "3600"             # how long finished MP3s are kept (seconds)
+      PLATINE_MAX_PLAYLIST_ITEMS: "100"    # maximum tracks for a playlist or an album
+      PLATINE_MAX_QUEUED: "500"            # queued conversions before answering 429
+      # PLATINE_PROXY: "http://proxy:3128"
+      # Password protection (HTTP Basic), enabled as soon as the password is set:
+      # PLATINE_AUTH_USERNAME: "me"
+      # PLATINE_AUTH_PASSWORD: "change-me"
+      # Cookies (Netscape export) for content that requires being signed in:
+      # PLATINE_COOKIES_FILE: "/etc/platine/cookies.txt"
+    # volumes:
+    #   # ":Z" relabels for SELinux (Fedora); Docker ignores it without SELinux.
+    #   - ./cookies.txt:/etc/platine/cookies.txt:ro,Z

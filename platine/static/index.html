@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Platine</title>
+  <meta name="description" content="Paste a YouTube, SoundCloud or Spotify link and get a 320 kbps MP3 with title, artist and cover.">
+  <meta name="theme-color" content="#be161e" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#2a0709" media="(prefers-color-scheme: dark)">
+  <meta name="application-name" content="Platine">
+  <meta name="apple-mobile-web-app-title" content="Platine">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" href="brand/app-icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="brand/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preload" href="vendor/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="app.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body x-data="platine" x-cloak
+      @dragover.prevent="dragging = true" @dragleave.self="dragging = false" @drop.prevent="onDrop($event)">
+
+  <!-- The platter: spins while a conversion runs, with the current track's cover as its label. -->
+  <div class="platter" :class="{ spinning: activeCount > 0 }" aria-hidden="true">
+    <div class="disc">
+      <div class="label">
+        <template x-if="nowPlaying">
+          <img :src="nowPlaying.thumbnail" alt="" referrerpolicy="no-referrer">
+        </template>
+        <template x-if="!nowPlaying">
+          <span class="label-print"><b>Platine</b><span>320 kbps</span></span>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <div class="page">
+    <header class="masthead">
+      <a class="wordmark" href="/" aria-label="Platine">
+        <img src="brand/mark.svg" alt="" width="34" height="34"><span>Platine</span>
+      </a>
+      <div class="masthead-actions">
+        <button type="button" class="btn btn-outline btn-small" x-show="canInstall" @click="install()">
+          <i class="bi bi-box-arrow-in-down" aria-hidden="true"></i> <span class="btn-label" x-text="t('header.install')"></span>
+        </button>
+        <div class="lang-switch" role="group" :aria-label="t('header.language')">
+          <template x-for="language in languages" :key="language.code">
+            <button type="button" class="lang-option" :lang="language.code" :title="language.name"
+                    :aria-pressed="String(lang === language.code)" @click="setLanguage(language.code)"
+                    x-text="language.label"></button>
+          </template>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" :class="{ dragging }">
+        <h1 x-text="t('hero.title')"></h1>
+        <form class="linkform" @submit.prevent="submit()" novalidate>
+          <input x-ref="input" x-model="url" @paste="onPaste($event)" @input="error = null"
+                 type="text" inputmode="url" autocomplete="off" spellcheck="false" autofocus
+                 placeholder="https://…" :aria-label="t('hero.inputLabel')" aria-describedby="hint">
+          <button type="submit" class="btn btn-primary" :disabled="pending > 0">
+            <span class="spinner" x-show="pending > 0" aria-hidden="true"></span>
+            <span x-text="pending > 0 ? t('hero.analysing') : t('hero.convert')"></span>
+          </button>
+        </form>
+        <p id="hint" class="hint" x-show="!error" x-text="t('hero.hint')"></p>
+        <p class="form-error" x-show="error" role="alert">
+          <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+          <span x-text="errorText(error)"></span>
+        </p>
+      </section>
+
+      <section class="crate" x-show="groups.length" :aria-label="t('crate.label')">
+        <div class="crate-tools" x-show="hasFinished">
+          <button type="button" class="btn-text" @click="clearFinished()">
+            <i class="bi bi-trash3" aria-hidden="true"></i> <span x-text="t('crate.clearFinished')"></span>
+          </button>
+        </div>
+
+        <template x-for="group in groups" :key="group.id">
+          <div class="group" :class="{ 'is-playlist': group.playlist }">
+            <template x-if="group.playlist">
+              <header class="group-head">
+                <div>
+                  <h2 x-text="group.playlist"></h2>
+                  <p class="group-meta" x-text="groupSummary(group)"></p>
+                </div>
+                <a class="btn btn-outline" x-show="readyIds(group).length > 1" :href="archiveUrl(group)" download>
+                  <i class="bi bi-file-earmark-zip" aria-hidden="true"></i> <span x-text="t('crate.saveAll')"></span>
+                </a>
+              </header>
+            </template>
+
+            <ol class="tracks">
+              <template x-for="job in group.jobs" :key="job.id">
+                <li class="track" :data-state="state(job)">
+                  <div class="record" :class="{ spinning: isActive(job) }" aria-hidden="true">
+                    <svg class="ring" viewBox="0 0 80 80">
+                      <circle class="ring-track" cx="40" cy="40" r="38"></circle>
+                      <circle class="ring-fill" cx="40" cy="40" r="38" pathLength="100"
+                              :class="{ indeterminate: isActive(job) && job.progress == null }"
+                              :style="`stroke-dashoffset: ${ringOffset(job)}`"></circle>
+                    </svg>
+                    <div class="disc">
+                      <div class="label">
+                        <template x-if="job.thumbnail">
+                          <img :src="job.thumbnail" alt="" loading="lazy" referrerpolicy="no-referrer">
+                        </template>
+                        <template x-if="!job.thumbnail">
+                          <i class="bi bi-music-note-beamed"></i>
+                        </template>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="track-body">
+                    <p class="track-title" x-text="job.title || t('track.analysing')" :title="job.title"></p>
+                    <p class="track-meta">
+                      <span class="source" :title="sourceLabel(job)">
+                        <i class="bi" :class="sourceIcon(job)" aria-hidden="true"></i>
+                        <span class="visually-hidden" x-text="sourceLabel(job)"></span>
+                      </span>
+                      <span x-text="subtitle(job)"></span>
+                    </p>
+                    <p class="track-status" aria-live="polite">
+                      <span x-text="statusText(job)"></span>
+                      <span class="status-detail" x-show="detailText(job)" x-text="detailText(job)"></span>
+                    </p>
+                  </div>
+
+                  <div class="track-actions">
+                    <template x-if="state(job) === 'done'">
+                      <a class="btn btn-primary btn-small" :href="fileUrl(job)" download>
+                        <i class="bi bi-download" aria-hidden="true"></i> <span x-text="t('actions.save')"></span>
+                      </a>
+                    </template>
+                    <template x-if="['error', 'cancelled', 'expired'].includes(state(job))">
+                      <button type="button" class="btn btn-outline btn-small" @click="retry(group, job)">
+                        <i class="bi bi-arrow-clockwise" aria-hidden="true"></i> <span x-text="t('actions.retry')"></span>
+                      </button>
+                    </template>
+                    <template x-if="isActive(job)">
+                      <button type="button" class="btn-icon" @click="cancel(job)"
+                              :title="t('actions.cancel')" :aria-label="t('actions.cancelLabel')">
+                        <i class="bi bi-stop-circle" aria-hidden="true"></i>
+                      </button>
+                    </template>
+                    <template x-if="!isActive(job)">
+                      <button type="button" class="btn-icon" @click="remove(group, job)"
+                              :title="t('actions.remove')" :aria-label="t('actions.removeLabel')">
+                        <i class="bi bi-x-lg" aria-hidden="true"></i>
+                      </button>
+                    </template>
+                  </div>
+                </li>
+              </template>
+            </ol>
+          </div>
+        </template>
+      </section>
+    </main>
+
+    <footer class="colophon">
+      <p x-text="t('footer.about', { ttl: ttlLabel })"></p>
+      <p class="shortcut">
+        <span x-text="t('footer.shortcutBefore')"></span>
+        <a class="bookmarklet" :href="bookmarklet" @click.prevent x-text="t('footer.bookmarklet')"></a>
+        <span x-text="t('footer.shortcutAfter')"></span>
+      </p>
+    </footer>
+  </div>
+
+  <!-- App notices: offline, new version ready. -->
+  <div class="notices" aria-live="polite">
+    <p class="notice" x-show="!online" x-transition.opacity>
+      <i class="bi bi-wifi-off" aria-hidden="true"></i>
+      <span x-text="t('notices.offline')"></span>
+    </p>
+    <p class="notice" x-show="updateReady" x-transition.opacity>
+      <i class="bi bi-stars" aria-hidden="true"></i>
+      <span x-text="t('notices.update')"></span>
+      <button type="button" class="btn btn-small notice-action" @click="applyUpdate()" x-text="t('notices.reload')"></button>
+    </p>
+  </div>
+</body>
+</html>

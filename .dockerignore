@@ -1,0 +1,23 @@
+# Only pyproject.toml, uv.lock, README.md and platine/ are needed to build the image.
+.git
+.github
+.gitignore
+.pre-commit-config.yaml
+.venv
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+.coverage.*
+coverage
+htmlcov
+.cache
+tests
+scripts
+charts
+Makefile
+compose.yaml
+cookies.txt
+*.mp3

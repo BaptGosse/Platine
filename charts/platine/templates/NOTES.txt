@@ -1,0 +1,32 @@
+Platine {{ .Chart.AppVersion }} is deployed in namespace {{ .Release.Namespace }}.
+
+{{- if gt (int .Values.replicaCount) 1 }}
+
+⚠ replicaCount={{ .Values.replicaCount }}: downloads are tracked in memory, in each pod.
+  Enable session affinity (cookie) on your Ingress or Gateway, or keep a single replica.
+{{- end }}
+
+Access:
+{{- if .Values.httpRoute.enabled }}
+{{- range .Values.httpRoute.hostnames }}
+  https://{{ . }}
+{{- end }}
+{{- else if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}
+{{- end }}
+{{- else }}
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "platine.fullname" . }} 8320:{{ .Values.service.port }}
+  then open http://localhost:8320
+{{- end }}
+{{- if .Values.auth.enabled }}
+
+Access is password protected (secret {{ include "platine.authSecretName" . }}).
+/healthz and /metrics stay reachable without a password.
+{{- end }}
+{{- if .Values.metrics.serviceMonitor.enabled }}
+
+Prometheus metrics: ServiceMonitor {{ include "platine.fullname" . }} scrapes /metrics every {{ .Values.metrics.serviceMonitor.interval }}.
+{{- end }}
+
+Check that everything answers: helm test {{ .Release.Name }} -n {{ .Release.Namespace }}

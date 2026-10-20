@@ -1,0 +1,36 @@
+# Platine pre-commit hooks: `pre-commit install`, then `pre-commit run --all-files` to check everything.
+exclude: ^platine/static/vendor/
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        # Helm templates are not valid YAML before rendering.
+        exclude: ^charts/[^/]+/templates/
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        # PWA screenshots (web app manifest) are around 500 KB, above the default limit.
+        exclude: ^platine/static/brand/screenshot-
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.1
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: uv run mypy
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: pylint
+        name: pylint
+        entry: uv run pylint platine tests scripts
+        language: system
+        types: [python]
+        pass_filenames: false

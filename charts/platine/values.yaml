@@ -1,0 +1,192 @@
+# Platine tracks downloads in memory, inside the pod: keep a single replica.
+# With more, enable sticky sessions (cookie affinity) on the Ingress or Gateway,
+# otherwise a client may poll a pod that does not know about its download.
+replicaCount: 1
+
+image:
+  # Image published by the Platine CI. Point it at your own registry if you build it yourself.
+  repository: ghcr.io/baptgosse/platine
+  # Empty means the chart appVersion.
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  # Empty means a name generated from the release.
+  name: ""
+  annotations: {}
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# Platine settings (PLATINE_* variables, through a ConfigMap).
+config:
+  # Conversions running in parallel.
+  maxConcurrent: 3
+  # How long a finished MP3 is kept before deletion (seconds).
+  fileTTL: 3600
+  # Maximum number of tracks for a playlist or an album.
+  maxPlaylistItems: 100
+  # Queued conversions beyond which the API answers 429 (too many requests).
+  maxQueued: 500
+  # Proxy used by yt-dlp (http://, socks5://...). If it contains credentials,
+  # use extraEnv with a secretKeyRef on PLATINE_PROXY instead.
+  proxy: ""
+
+# Password protection (HTTP Basic) for all of Platine except /healthz and /metrics.
+auth:
+  enabled: false
+  username: platine
+  password: ""
+  # Existing secret to use instead of username/password above.
+  existingSecret: ""
+  usernameKey: username
+  passwordKey: password
+
+# Cookies (Netscape "cookies.txt" export) for content that requires being signed in.
+# kubectl create secret generic platine-cookies --from-file=cookies.txt=./cookies.txt
+cookies:
+  existingSecret: ""
+  key: cookies.txt
+
+# /tmp: downloads in progress, finished MP3s and caches (yt-dlp, deno).
+tmp:
+  sizeLimit: 2Gi
+  # "Memory" for a tmpfs (counted against the pod memory limit).
+  medium: ""
+
+service:
+  type: ClusterIP
+  port: 80
+  annotations: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: platine.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: platine-tls
+  #    hosts:
+  #      - platine.example.com
+
+# Gateway API (ingress-nginx was retired in 2026: this is the preferred option).
+httpRoute:
+  enabled: false
+  annotations: {}
+  parentRefs:
+    - name: gateway
+      namespace: gateway-system
+      # sectionName: https
+  hostnames:
+    - platine.example.com
+
+# Platine downloads arbitrary URLs: the NetworkPolicy limits egress to the public Internet
+# (and DNS) so it cannot be used to probe the internal network.
+networkPolicy:
+  enabled: false
+  ingress:
+    # Sources allowed on the http port (empty means everyone, Prometheus included).
+    # When restricting, add the Prometheus namespace so scraping keeps working, e.g.:
+    #   - namespaceSelector:
+    #       matchLabels:
+    #         kubernetes.io/metadata.name: monitoring
+    from: []
+  egress:
+    dns:
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ipBlocks:
+      - cidr: 0.0.0.0/0
+        except:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+          - 169.254.0.0/16
+      - cidr: ::/0
+        except:
+          - fc00::/7
+          - fe80::/10
+    # Extra egress rules (e.g. an internal proxy).
+    extra: []
+
+# Prometheus metrics on /metrics (http port, no password, like /healthz).
+metrics:
+  # Adds the prometheus.io/scrape, port and path annotations to the pod.
+  podAnnotations: false
+  # ServiceMonitor for prometheus-operator (needs the monitoring.coreos.com/v1 CRD).
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    scrapeTimeout: 10s
+    # Labels expected by your Prometheus selector (e.g. release: kube-prometheus-stack).
+    labels: {}
+    annotations: {}
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 1Gi
+
+startupProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  periodSeconds: 2
+  failureThreshold: 30
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 3
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+terminationGracePeriodSeconds: 60
+
+# Extra environment variables (full Kubernetes format, valueFrom allowed).
+extraEnv: []
+#  - name: PLATINE_PROXY
+#    valueFrom:
+#      secretKeyRef:
+#        name: platine-proxy
+#        key: url
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

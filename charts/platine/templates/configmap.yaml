@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "platine.fullname" . }}
+  labels:
+    {{- include "platine.labels" . | nindent 4 }}
+data:
+  PLATINE_MAX_CONCURRENT: {{ .Values.config.maxConcurrent | quote }}
+  PLATINE_FILE_TTL: {{ .Values.config.fileTTL | quote }}
+  PLATINE_MAX_PLAYLIST_ITEMS: {{ .Values.config.maxPlaylistItems | quote }}
+  PLATINE_MAX_QUEUED: {{ .Values.config.maxQueued | quote }}
+  PLATINE_WORKDIR: /tmp/platine
+  XDG_CACHE_HOME: /tmp/.cache
+  DENO_DIR: /tmp/.cache/deno
+  {{- with .Values.config.proxy }}
+  PLATINE_PROXY: {{ . | quote }}
+  {{- end }}
+  {{- if .Values.cookies.existingSecret }}
+  PLATINE_COOKIES_FILE: /etc/platine/cookies.txt
+  {{- end }}

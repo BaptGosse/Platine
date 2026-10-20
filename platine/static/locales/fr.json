@@ -1,0 +1,115 @@
+{
+  "meta": {
+    "description": "Colle un lien YouTube, SoundCloud ou Spotify et récupère un MP3 320 kbps avec titre, artiste et pochette."
+  },
+  "header": {
+    "install": "Installer l'app",
+    "language": "Langue"
+  },
+  "hero": {
+    "title": "Colle un lien.",
+    "inputLabel": "Lien du morceau, de la vidéo, de la playlist ou de l'album",
+    "convert": "Convertir",
+    "analysing": "Analyse…",
+    "hint": "YouTube, YouTube Music, SoundCloud, Spotify, Bandcamp et des centaines d'autres sites. Playlists et albums acceptés : la conversion démarre dès que tu colles le lien."
+  },
+  "crate": {
+    "label": "Tes morceaux",
+    "clearFinished": "Retirer les morceaux terminés",
+    "saveAll": "Tout enregistrer (.zip)"
+  },
+  "group": {
+    "summary": "{{tracks}}, {{ready}}",
+    "tracks_one": "{{count}} morceau",
+    "tracks_many": "{{count}} morceaux",
+    "tracks_other": "{{count}} morceaux",
+    "ready_one": "{{count}} prêt",
+    "ready_many": "{{count}} prêts",
+    "ready_other": "{{count}} prêts",
+    "allReady_one": "prêt",
+    "allReady_many": "tous prêts",
+    "allReady_other": "tous prêts"
+  },
+  "track": {
+    "analysing": "Analyse du lien…",
+    "spotifySource": "Spotify, son récupéré sur YouTube Music"
+  },
+  "status": {
+    "queued": "En attente",
+    "matching": "Recherche sur YouTube Music",
+    "downloading": "Téléchargement",
+    "downloadingPercent": "Téléchargement {{percent}}",
+    "converting": "Conversion en MP3 320 kbps",
+    "done": "Prêt",
+    "doneSize": "Prêt, {{size}}",
+    "failed": "La conversion a échoué.",
+    "cancelled": "Annulé",
+    "expired": "Fichier expiré : relance la conversion"
+  },
+  "detail": {
+    "speed": "{{speed}}/s",
+    "until": "jusqu'à {{time}}"
+  },
+  "actions": {
+    "save": "Enregistrer",
+    "retry": "Réessayer",
+    "cancel": "Annuler",
+    "cancelLabel": "Annuler la conversion",
+    "remove": "Retirer",
+    "removeLabel": "Retirer de la liste"
+  },
+  "footer": {
+    "about": "MP3 320 kbps avec titre, artiste et pochette. Les fichiers restent disponibles {{ttl}} après la conversion. Pour Spotify, les infos viennent de Spotify et le son de YouTube Music.",
+    "shortcutBefore": "Raccourci : glisse",
+    "bookmarklet": "Convertir avec Platine",
+    "shortcutAfter": "dans ta barre de favoris, puis clique dessus depuis n'importe quelle page de musique ou de vidéo."
+  },
+  "notices": {
+    "offline": "Hors ligne. Tes morceaux restent là, les conversions reprendront au retour du réseau.",
+    "update": "Une nouvelle version de Platine est prête.",
+    "reload": "Recharger"
+  },
+  "units": {
+    "size": "{{value}} {{unit}}",
+    "percent": "{{value}} %",
+    "B": "o",
+    "kB": "Ko",
+    "MB": "Mo",
+    "GB": "Go",
+    "hours_one": "{{value}} h",
+    "hours_many": "{{value}} h",
+    "hours_other": "{{value}} h",
+    "minutes_one": "{{value}} min",
+    "minutes_many": "{{value}} min",
+    "minutes_other": "{{value}} min"
+  },
+  "errors": {
+    "empty_input": "Colle d'abord un lien.",
+    "network": "Impossible de joindre Platine : vérifie ta connexion et réessaie.",
+    "server": "Le serveur a répondu {{status}}.",
+    "unsupported_site": "Ce site n'est pas pris en charge, ou la page ne contient ni son ni vidéo.",
+    "invalid_url": "Ce lien n'est pas valide.",
+    "drm": "Ce média est protégé par DRM : impossible de le récupérer.",
+    "private": "Cette vidéo est privée.",
+    "age_restricted": "Ce média a une limite d'âge. Ajoute les cookies d'un compte connecté (voir le README).",
+    "bot_check": "YouTube bloque ce serveur avec une vérification anti-robot. Ajoute des cookies ou un proxy (voir le README).",
+    "live_not_started": "Ce direct n'a pas encore commencé.",
+    "unavailable": "Ce média n'est pas disponible : supprimé, privé ou bloqué dans ce pays.",
+    "not_found": "Page introuvable (erreur 404). Vérifie le lien.",
+    "forbidden": "Le site refuse l'accès (erreur 403).",
+    "unreachable": "Impossible de joindre la page. Vérifie le lien et réessaie.",
+    "unexpected": "Erreur inattendue pendant la conversion.",
+    "not_a_link": "Ce lien n'est pas valide : il doit commencer par https://",
+    "live_not_supported": "Les directs ne sont pas pris en charge : attends la fin de la diffusion.",
+    "spotify_not_found": "Ce contenu Spotify est introuvable : lien privé ou supprimé ?",
+    "spotify_unavailable": "Spotify n'a pas répondu correctement. Réessaie dans un instant.",
+    "spotify_unsupported": "Seuls les morceaux, albums et playlists Spotify sont pris en charge.",
+    "ytm_unavailable": "YouTube Music n'a pas répondu. Réessaie dans un instant.",
+    "ytm_no_match": "Morceau introuvable sur YouTube Music.",
+    "no_tracks": "Aucun morceau trouvé à cette adresse.",
+    "queue_full": "Trop de conversions en attente : réessaie dans quelques minutes.",
+    "job_not_found": "Conversion introuvable.",
+    "file_gone": "Ce fichier n'est plus disponible : relance la conversion.",
+    "archive_empty": "Aucun fichier prêt à mettre dans l'archive."
+  }
+}

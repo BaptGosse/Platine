@@ -1,0 +1,18 @@
+apiVersion: v2
+name: platine
+description: Platine - paste a link (YouTube, YouTube Music, SoundCloud, Spotify...), get a 320 kbps MP3. yt-dlp + ffmpeg + FastAPI.
+type: application
+version: 0.2.0
+appVersion: "2.0.0"
+kubeVersion: ">=1.25.0-0"
+home: https://github.com/BaptGosse/Platine
+sources:
+  - https://github.com/BaptGosse/Platine
+icon: https://raw.githubusercontent.com/BaptGosse/Platine/main/platine/static/brand/app-icon.svg
+keywords:
+  - yt-dlp
+  - mp3
+  - youtube
+  - soundcloud
+  - spotify
+  - downloader

@@ -1,0 +1,245 @@
+name: Platine CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  UV_VERSION: "0.13.3"
+  KUBECONFORM_IMAGE: ghcr.io/yannh/kubeconform:v0.7.0
+  KUBERNETES_VERSION: "1.33.0"
+
+jobs:
+  python:
+    name: Python (ruff, mypy, pylint, tests, coverage)
+    runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: "3.14"
+          enable-cache: true
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Ruff lint
+        run: uv run ruff check .
+      - name: Ruff format
+        run: uv run ruff format --check .
+      - name: Mypy
+        run: uv run mypy
+      - name: Pylint
+        run: uv run pylint platine tests scripts
+      - name: Tests with coverage
+        run: >-
+          uv run pytest --cov --cov-report=term
+          --cov-report=xml:coverage/python/coverage.xml
+          --cov-report=html:coverage/python/html
+          --cov-report=lcov:coverage/python/lcov.info
+      - name: Coverage gate (100 %)
+        if: ${{ !cancelled() }}
+        run: uv run python scripts/coverage_gate.py --name Python coverage/python/lcov.info
+      - name: Upload coverage report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-python
+          path: coverage/python
+          if-no-files-found: error
+      - name: Upload to Codecov
+        if: ${{ !cancelled() && env.CODECOV_TOKEN != '' }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ env.CODECOV_TOKEN }}
+          files: coverage/python/coverage.xml
+          flags: python
+
+  js:
+    name: JavaScript (tests, coverage)
+    runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Tests with coverage
+        run: deno test --coverage=coverage/js/raw tests/js
+      - name: Coverage reports (lcov, HTML)
+        if: ${{ !cancelled() }}
+        # Same filter as `make coverage-js`: main.js (bootstrap) and sw.js (service worker) are left out.
+        run: |
+          filter=(--include='platine/static/js/' --exclude='main\.js')
+          deno coverage coverage/js/raw "${filter[@]}" --lcov --output=coverage/js/lcov.info
+          # deno test already wrote an unfiltered HTML report there: start from a clean directory.
+          rm -rf coverage/js/raw/html
+          deno coverage coverage/js/raw "${filter[@]}" --html
+          mv coverage/js/raw/html coverage/js/html
+      - name: Coverage gate (100 %)
+        if: ${{ !cancelled() }}
+        run: python3 scripts/coverage_gate.py --name JS coverage/js/lcov.info
+      - name: Upload coverage report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-js
+          path: |
+            coverage/js
+            !coverage/js/raw
+          if-no-files-found: error
+      - name: Upload to Codecov
+        if: ${{ !cancelled() && env.CODECOV_TOKEN != '' }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ env.CODECOV_TOKEN }}
+          files: coverage/js/lcov.info
+          flags: js
+
+  helm:
+    name: Helm chart
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: azure/setup-helm@v4
+      - name: Helm lint
+        run: |
+          helm lint charts/platine
+          helm lint charts/platine --values charts/platine/ci/all-features-values.yaml
+      - name: Kubeconform
+        run: |
+          for values in charts/platine/values.yaml charts/platine/ci/all-features-values.yaml; do
+            echo "::group::$values"
+            helm template platine charts/platine --values "$values" \
+              | docker run --rm -i "$KUBECONFORM_IMAGE" -strict -summary \
+                  -kubernetes-version "$KUBERNETES_VERSION" \
+                  -schema-location default \
+                  -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+            echo "::endgroup::"
+          done
+
+  coverage-pages:
+    name: Publish coverage to GitHub Pages
+    # Published even when a gate fails, so the badges always show the real numbers.
+    if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: [python, js]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: "3.14"
+          enable-cache: true
+      - name: Install badge tools
+        run: uv sync --frozen --only-dev
+      - uses: actions/download-artifact@v4
+        with:
+          name: coverage-python
+          path: site/python
+      - uses: actions/download-artifact@v4
+        with:
+          name: coverage-js
+          path: site/js
+      - name: Badges
+        run: |
+          mkdir -p site/badges
+          uv run --no-sync genbadge coverage -l -n "python coverage" -i site/python/coverage.xml -o site/badges/python.svg
+          uv run --no-sync lcov_cobertura site/js/lcov.info -b . -o site/js/cobertura.xml
+          uv run --no-sync genbadge coverage -l -n "js coverage" -i site/js/cobertura.xml -o site/badges/js.svg
+      - name: Index page
+        run: |
+          cp platine/static/brand/logo-white.svg platine/static/brand/mark.svg site/
+          sed -e "s|{{REPO_URL}}|$GITHUB_SERVER_URL/$GITHUB_REPOSITORY|g" \
+              -e "s|{{COMMIT_SHORT}}|${GITHUB_SHA::7}|g" \
+              -e "s|{{COMMIT}}|$GITHUB_SHA|g" \
+              -e "s|{{DATE}}|$(date -u '+%Y-%m-%d %H:%M UTC')|g" \
+              .github/coverage-site/index.html > site/index.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+  image:
+    name: Container image
+    needs: [python, js, helm]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
+      - uses: docker/login-action@v3
+        if: github.event_name != 'pull_request'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  chart-release:
+    name: Publish Helm chart
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [image]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: azure/setup-helm@v4
+      - name: Helm package and push to oci://ghcr.io/<owner>/charts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          echo "$GH_TOKEN" | helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          # The chart takes the tag as its version, and defaults to the image pushed just before.
+          helm package charts/platine --version "$version" --app-version "$version" --destination dist
+          helm push "dist/platine-$version.tgz" "oci://ghcr.io/$owner/charts"

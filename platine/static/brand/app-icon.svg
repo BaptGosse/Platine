@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Platine">
+  <title>Platine</title>
+  <rect width="100" height="100" rx="22" fill="#BE161E"/>
+  <g transform="translate(13 13) scale(.74)">
+    <circle cx="50" cy="50" r="48" fill="#141416"/>
+    <g fill="none" stroke="#2B282E" stroke-width="1.1">
+      <circle cx="50" cy="50" r="43"/><circle cx="50" cy="50" r="38"/><circle cx="50" cy="50" r="33"/><circle cx="50" cy="50" r="28"/>
+    </g>
+    <path d="M50 50 74 8.43A48 48 0 0 1 86.77 19.15ZM50 50 26 91.57A48 48 0 0 1 13.23 80.85Z" fill="#fff" fill-opacity=".13"/>
+    <circle cx="50" cy="50" r="21" fill="#E0242C"/>
+    <path d="M50 39.5V58M41.5 50.5 50 59l8.5-8.5" fill="none" stroke="#FFF1E6" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

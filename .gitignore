@@ -1,0 +1,16 @@
+# Local environment and tool caches
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Coverage reports (published by CI to GitHub Pages)
+.coverage
+.coverage.*
+coverage/
+htmlcov/
+
+# Downloaded audio and local secrets
+*.mp3
+cookies.txt

@@ -1,0 +1,744 @@
+/* Platine: a red record label. Every track is a disc that spins at 33 1/3 rpm
+   during the conversion; the ring around it shows the progress. */
+
+@font-face {
+  font-family: "Archivo";
+  src: url("vendor/fonts/archivo-latin.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Archivo";
+  src: url("vendor/fonts/archivo-latin-ext.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root {
+  color-scheme: dark;
+  --bg: #be161e;
+  --ink: #ffffff;
+  --ink-soft: rgb(255 255 255 / 0.82);
+  --ink-faint: rgb(255 255 255 / 0.32);
+  --sticker: #ffe27a;
+  --sticker-ink: #6e0a0f;
+  --vinyl: #141416;
+  --groove: #24212a;
+
+  --gutter: clamp(16px, 5vw, 48px);
+  --column: 46rem;
+  --spin: 1.8s; /* 33 1/3 revolutions per minute */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #2a0709;
+    --ink: #fff1ef;
+    --ink-soft: rgb(255 241 239 / 0.74);
+    --ink-faint: rgb(255 241 239 / 0.22);
+    --sticker-ink: #2a0709;
+    --vinyl: #070607;
+    --groove: #191519;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[x-cloak] {
+  display: none !important;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Archivo", system-ui, sans-serif;
+  font-size: 1rem;
+  font-stretch: 100%;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+p,
+h1,
+h2 {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--sticker);
+  outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Layout ---------------------------------------------------------------- */
+
+.page {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-width: calc(var(--column) + 2 * var(--gutter));
+  padding: 0 var(--gutter);
+  margin-left: clamp(0px, 7vw - 32px, 120px);
+}
+
+main {
+  flex: 1;
+}
+
+.masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 0 0;
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.375rem;
+  font-weight: 850;
+  font-stretch: 125%;
+  letter-spacing: -0.015em;
+  text-decoration: none;
+}
+
+.wordmark img {
+  display: block;
+}
+
+.masthead-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Language switcher: two small pressed/unpressed toggles. */
+.lang-switch {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1.5px var(--ink-faint);
+}
+
+.lang-option {
+  min-width: 2.5rem;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-stretch: 112%;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lang-option:hover {
+  color: var(--ink);
+}
+
+.lang-option[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+/* Link input ---------------------------------------------------------------- */
+
+.hero {
+  padding: clamp(56px, 14vh, 128px) 0 clamp(40px, 8vh, 72px);
+}
+
+h1 {
+  font-size: clamp(2.75rem, 6.2vw + 1rem, 5.5rem);
+  font-weight: 820;
+  font-stretch: 125%;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  margin-bottom: clamp(28px, 5vh, 44px);
+}
+
+.linkform {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px 20px;
+}
+
+.linkform input {
+  flex: 1 1 20rem;
+  min-width: 0;
+  padding: 10px 0 12px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: inset 0 -2px 0 var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: clamp(1.25rem, 1vw + 1rem, 1.5rem);
+  font-stretch: 108%;
+  caret-color: var(--sticker);
+}
+
+.linkform input::placeholder {
+  color: var(--ink-faint);
+}
+
+.linkform input:focus {
+  outline: none;
+  box-shadow: inset 0 -3px 0 var(--sticker);
+}
+
+.hero.dragging .linkform input {
+  box-shadow: inset 0 -3px 0 var(--sticker);
+}
+
+.hint,
+.form-error {
+  max-width: 38rem;
+  margin-top: 18px;
+  color: var(--ink-soft);
+}
+
+.form-error {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  color: var(--sticker);
+  font-weight: 560;
+}
+
+/* Buttons --------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 26px;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 680;
+  font-stretch: 110%;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.btn-primary:hover {
+  background: var(--sticker);
+  color: var(--sticker-ink);
+}
+
+.btn-primary:disabled {
+  cursor: progress;
+  background: var(--ink-soft);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--ink-faint);
+}
+
+.btn-outline:hover {
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+
+.btn-small {
+  padding: 9px 16px;
+  font-size: 0.9375rem;
+}
+
+.btn-icon,
+.btn-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  font: inherit;
+  cursor: pointer;
+}
+
+.btn-icon {
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.125rem;
+}
+
+.btn-icon:hover,
+.btn-text:hover {
+  color: var(--ink);
+}
+
+.btn-text {
+  padding: 6px 0;
+  font-size: 0.9375rem;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Discs --------------------------------------------------------------------- */
+
+.disc {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(circle at center, var(--vinyl) 0 2px, var(--groove) 2px 3px, var(--vinyl) 3px 5px),
+    var(--vinyl);
+}
+
+.label {
+  position: absolute;
+  inset: 31%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--sticker);
+  color: var(--sticker-ink);
+}
+
+.label img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Spindle hole. */
+.label::after {
+  content: "";
+  position: absolute;
+  width: 9%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--bg);
+}
+
+/* Sheen: it does not turn with the disc, which is what makes the rotation visible. */
+.record::after,
+.platter::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 20deg,
+    transparent 0 6%,
+    rgb(255 255 255 / 0.13) 11%,
+    transparent 17% 50%,
+    rgb(255 255 255 / 0.1) 61%,
+    transparent 67%
+  );
+  pointer-events: none;
+}
+
+.spinning .disc {
+  animation: spin var(--spin) linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* The big platter, top right on wide screens. */
+.platter {
+  position: absolute;
+  z-index: 0;
+  top: clamp(-200px, -10vw, -60px);
+  right: clamp(-360px, -17vw, -120px);
+  width: min(56vw, 820px);
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+
+.platter::after {
+  inset: 0;
+}
+
+.platter .label {
+  inset: 33%;
+}
+
+.label-print {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15em;
+  margin-top: 38%;
+  font-size: clamp(0.75rem, 1.3vw, 1.25rem);
+  font-stretch: 125%;
+  line-height: 1;
+}
+
+.label-print b {
+  font-weight: 850;
+  font-size: 1.35em;
+  letter-spacing: -0.02em;
+}
+
+.label-print span {
+  font-weight: 560;
+}
+
+@media (max-width: 1099px) {
+  .platter {
+    display: none;
+  }
+}
+
+/* Track list ---------------------------------------------------------------- */
+
+.crate {
+  padding-bottom: 64px;
+}
+
+.crate-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.group + .group {
+  margin-top: 28px;
+}
+
+.group.is-playlist {
+  margin-top: 48px;
+}
+
+.group.is-playlist:first-of-type {
+  margin-top: 8px;
+}
+
+.group-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 20px;
+}
+
+.group-head h2 {
+  font-size: clamp(1.5rem, 1.5vw + 1rem, 2rem);
+  font-weight: 780;
+  font-stretch: 120%;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.group-meta {
+  margin-top: 6px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.tracks {
+  display: grid;
+  gap: 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.track {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  animation: slide-out-of-sleeve 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes slide-out-of-sleeve {
+  from {
+    opacity: 0;
+    transform: translateX(-24px) rotate(-30deg);
+  }
+}
+
+.record {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  padding: 7px;
+}
+
+.record::after {
+  inset: 7px;
+}
+
+/* Label bigger than on a real record: the cover must stay recognisable. */
+.record .label {
+  inset: 22%;
+}
+
+.record .label i {
+  font-size: 0.85rem;
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  transform: rotate(-90deg);
+}
+
+.ring circle {
+  fill: none;
+  stroke-width: 3;
+}
+
+.ring-track {
+  stroke: var(--ink-faint);
+}
+
+.ring-fill {
+  stroke: var(--ink);
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  transition: stroke-dashoffset 0.6s ease-out;
+}
+
+.ring-fill.indeterminate {
+  stroke-dasharray: 18 82;
+  stroke-dashoffset: 0 !important;
+  transform-origin: center;
+  animation: spin 1.4s linear infinite;
+  transition: none;
+}
+
+.track[data-state="error"] .ring-fill,
+.track[data-state="cancelled"] .ring-fill,
+.track[data-state="expired"] .ring-fill {
+  stroke: transparent;
+}
+
+.track[data-state="error"] .ring-track {
+  stroke: var(--sticker);
+}
+
+.track-body {
+  min-width: 0;
+}
+
+.track-title {
+  overflow: hidden;
+  font-size: 1.1875rem;
+  font-weight: 680;
+  font-stretch: 112%;
+  line-height: 1.3;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.track-meta {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  overflow: hidden;
+  margin-top: 2px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.track-meta > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 6px;
+  font-size: 0.9375rem;
+  font-weight: 560;
+  font-variant-numeric: tabular-nums;
+}
+
+.status-detail {
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+
+.track[data-state="error"] .track-status {
+  color: var(--sticker);
+}
+
+.track[data-state="cancelled"],
+.track[data-state="expired"] {
+  color: var(--ink-soft);
+}
+
+.track-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Footer ------------------------------------------------------------------ */
+
+.colophon {
+  display: grid;
+  gap: 10px;
+  max-width: 40rem;
+  padding: 28px 0 36px;
+  border-top: 1.5px solid var(--ink-faint);
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+.bookmarklet {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--sticker);
+  color: var(--sticker-ink);
+  font-weight: 680;
+  text-decoration: none;
+  cursor: grab;
+}
+
+/* Notices (offline, update) --------------------------------------------- */
+
+.notices {
+  position: fixed;
+  z-index: 2;
+  bottom: 16px;
+  left: var(--gutter);
+  right: var(--gutter);
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  max-width: 34rem;
+  padding: 12px 18px;
+  border-radius: 20px;
+  background: var(--sticker);
+  color: var(--sticker-ink);
+  font-weight: 560;
+  pointer-events: auto;
+}
+
+.notice-action {
+  background: var(--sticker-ink);
+  color: var(--sticker);
+}
+
+/* Small screens ----------------------------------------------------------------- */
+
+@media (max-width: 560px) {
+  .linkform .btn {
+    width: 100%;
+  }
+
+  /* Icon only, the label stays readable by screen readers. */
+  .masthead .btn-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .track {
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 4px 16px;
+  }
+
+  .record {
+    width: 64px;
+    height: 64px;
+    padding: 6px;
+  }
+
+  .record::after {
+    inset: 6px;
+  }
+
+  .track-actions {
+    grid-column: 2;
+    margin-left: -10px;
+  }
+}
+
+/* The bookmarklet makes no sense on a phone. */
+@media (hover: none) {
+  .colophon .shortcut {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

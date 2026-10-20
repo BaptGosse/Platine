@@ -1,0 +1,22 @@
+# Platine depends on yt-dlp, which ships fixes often to keep up with sites:
+# Dependabot proposes the upgrade every week.
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      yt-dlp:
+        patterns: ["yt-dlp*"]
+      python:
+        patterns: ["*"]
+        exclude-patterns: ["yt-dlp*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: monthly
