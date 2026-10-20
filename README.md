@@ -43,78 +43,80 @@ as 320 kbps MP3 files with title, artist, album and cover.</p>
 > own (for example music you bought). Downloading copyrighted content without permission is illegal in most
 > countries, and many sites, YouTube and Spotify included, forbid downloads in their terms of service.
 
-## Stack
+## Tech stack
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
-  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
-  <img src="https://img.shields.io/badge/yt--dlp-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="yt-dlp">
-  <img src="https://img.shields.io/badge/FFmpeg-007808?style=for-the-badge&logo=ffmpeg&logoColor=white" alt="FFmpeg">
-  <img src="https://img.shields.io/badge/Alpine.js-8BC0D0?style=for-the-badge&logo=alpinedotjs&logoColor=black" alt="Alpine.js">
-  <img src="https://img.shields.io/badge/i18next-26A69A?style=for-the-badge&logo=i18next&logoColor=white" alt="i18next">
-  <img src="https://img.shields.io/badge/Workbox-PWA-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="Workbox">
-  <img src="https://img.shields.io/badge/uv-DE5FE9?style=for-the-badge&logo=uv&logoColor=white" alt="uv">
-  <img src="https://img.shields.io/badge/Podman-892CA0?style=for-the-badge&logo=podman&logoColor=white" alt="Podman">
-  <img src="https://img.shields.io/badge/Helm-0F1689?style=for-the-badge&logo=helm&logoColor=white" alt="Helm">
-</p>
+Everything Platine is built on is open source. Each badge links to the project and each license to its text.
 
 ### Download and conversion
 
-| | Tool | Role in Platine | License |
-| --- | --- | --- | --- |
-| 🎬 | [yt-dlp](https://github.com/yt-dlp/yt-dlp) | Reads links and downloads the best audio from 1,800+ sites | Unlicense |
-| 🎚️ | [FFmpeg](https://ffmpeg.org) | Encodes the 320 kbps MP3, embeds tags and cover | LGPL-2.1+ / GPL-2.0+ |
-| 🦕 | [Deno](https://deno.com) | JavaScript runtime yt-dlp needs to read YouTube | MIT |
-| 🟢 | [spotifyscraper](https://github.com/AliAkhtari78/SpotifyScraper) | Spotify track, album and playlist details, without an API key | MIT |
-| 🔎 | [ytmusicapi](https://github.com/sigma67/ytmusicapi) | Finds the matching recording on YouTube Music | MIT |
-| 🏷️ | [mutagen](https://github.com/quodlibet/mutagen) | Writes the Spotify ID3 tags and cover | GPL-2.0-or-later |
-| 🌐 | [Requests](https://github.com/psf/requests) | HTTP with retries for covers and YouTube Music | Apache-2.0 |
+| Tool | Used for | License |
+| --- | --- | --- |
+| [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org) | language of the server and the command line, 3.12+ | [PSF-2.0](https://github.com/python/cpython/blob/main/LICENSE) |
+| [![yt-dlp](https://img.shields.io/badge/yt--dlp-CC0000?style=for-the-badge&logo=youtube&logoColor=white)](https://github.com/yt-dlp/yt-dlp) | reads links and downloads the best audio from 1,800+ sites | [Unlicense](https://github.com/yt-dlp/yt-dlp/blob/master/LICENSE) |
+| [![FFmpeg](https://img.shields.io/badge/FFmpeg-007808?style=for-the-badge&logo=ffmpeg&logoColor=white)](https://ffmpeg.org) | encodes the 320 kbps MP3, embeds tags and cover | [LGPL-2.1+ / GPL-2.0+](https://github.com/FFmpeg/FFmpeg/blob/master/LICENSE.md) |
+| [![Deno](https://img.shields.io/badge/Deno-000000?style=for-the-badge&logo=deno&logoColor=white)](https://deno.com) | JavaScript runtime yt-dlp needs for YouTube, and the frontend test runner | [MIT](https://github.com/denoland/deno/blob/main/LICENSE.md) |
+| [![SpotifyScraper](https://img.shields.io/badge/SpotifyScraper-1DB954?style=for-the-badge&logo=spotify&logoColor=white)](https://github.com/AliAkhtari78/SpotifyScraper) | Spotify track, album and playlist details without an API key | [MIT](https://github.com/AliAkhtari78/SpotifyScraper/blob/master/LICENSE) |
+| [![ytmusicapi](https://img.shields.io/badge/ytmusicapi-FF0000?style=for-the-badge&logo=youtubemusic&logoColor=white)](https://github.com/sigma67/ytmusicapi) | finds the matching recording on YouTube Music | [MIT](https://github.com/sigma67/ytmusicapi/blob/main/LICENSE) |
+| [![mutagen](https://img.shields.io/badge/mutagen-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://github.com/quodlibet/mutagen) | writes the Spotify ID3 tags and cover | [GPL-2.0-or-later](https://github.com/quodlibet/mutagen/blob/main/COPYING) |
+| [![Requests](https://img.shields.io/badge/Requests-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://requests.readthedocs.io) | HTTP with retries for covers and YouTube Music | [Apache-2.0](https://github.com/psf/requests/blob/main/LICENSE) |
 
 ### Server and command line
 
-| | Tool | Role in Platine | License |
-| --- | --- | --- | --- |
-| ⚡ | [FastAPI](https://github.com/fastapi/fastapi) | HTTP API, static files and the generated service worker | MIT |
-| 🦄 | [Uvicorn](https://github.com/encode/uvicorn) | ASGI server | BSD-3-Clause |
-| 🧾 | [Pydantic](https://github.com/pydantic/pydantic) + [pydantic-settings](https://github.com/pydantic/pydantic-settings) | API models and `PLATINE_*` settings | MIT |
-| 📈 | [prometheus-fastapi-instrumentator](https://github.com/trallnag/prometheus-fastapi-instrumentator) + [client_python](https://github.com/prometheus/client_python) | `/metrics` endpoint and conversion metrics | ISC / Apache-2.0 |
-| ⌨️ | [Typer](https://github.com/fastapi/typer) | `platine download` and `platine serve` commands | MIT |
-| 🌈 | [Rich](https://github.com/Textualize/rich) | Progress bars in the terminal | MIT |
+| Tool | Used for | License |
+| --- | --- | --- |
+| [![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com) | HTTP API, static files and the generated service worker | [MIT](https://github.com/fastapi/fastapi/blob/master/LICENSE) |
+| [![Uvicorn](https://img.shields.io/badge/Uvicorn-2C3E50?style=for-the-badge&logo=python&logoColor=white)](https://github.com/Kludex/uvicorn) | ASGI server | [BSD-3-Clause](https://github.com/Kludex/uvicorn/blob/main/LICENSE.md) |
+| [![Pydantic](https://img.shields.io/badge/Pydantic-E92063?style=for-the-badge&logo=pydantic&logoColor=white)](https://docs.pydantic.dev) | API models and validation | [MIT](https://github.com/pydantic/pydantic/blob/main/LICENSE) |
+| [![pydantic-settings](https://img.shields.io/badge/pydantic--settings-E92063?style=for-the-badge&logo=pydantic&logoColor=white)](https://github.com/pydantic/pydantic-settings) | `PLATINE_*` settings from the environment | [MIT](https://github.com/pydantic/pydantic-settings/blob/main/LICENSE) |
+| [![Prometheus Instrumentator](https://img.shields.io/badge/Prometheus%20Instrumentator-E6522C?style=for-the-badge&logo=prometheus&logoColor=white)](https://github.com/trallnag/prometheus-fastapi-instrumentator) | `/metrics` endpoint with the HTTP metrics | [ISC](https://github.com/trallnag/prometheus-fastapi-instrumentator/blob/master/LICENSE) |
+| [![Prometheus client](https://img.shields.io/badge/Prometheus%20client-E6522C?style=for-the-badge&logo=prometheus&logoColor=white)](https://github.com/prometheus/client_python) | conversion counters, durations and queue size | [Apache-2.0](https://github.com/prometheus/client_python/blob/master/LICENSE) |
+| [![Typer](https://img.shields.io/badge/Typer-0F766E?style=for-the-badge&logo=python&logoColor=white)](https://typer.tiangolo.com) | `platine download` and `platine serve` commands | [MIT](https://github.com/fastapi/typer/blob/master/LICENSE) |
+| [![Rich](https://img.shields.io/badge/Rich-4B1D7A?style=for-the-badge&logo=python&logoColor=white)](https://github.com/Textualize/rich) | progress bars in the terminal | [MIT](https://github.com/Textualize/rich/blob/main/LICENSE) |
 
 ### Interface
 
-| | Tool | Role in Platine | License |
-| --- | --- | --- | --- |
-| 🏔️ | [Alpine.js](https://alpinejs.dev) + [Persist](https://alpinejs.dev/plugins/persist) | Reactive interface, track list kept across reloads | MIT |
-| 🗣️ | [i18next](https://www.i18next.com) + [language detector](https://github.com/i18next/i18next-browser-languageDetector) | French and English translations | MIT |
-| 📦 | [Workbox](https://developer.chrome.com/docs/workbox) | Service worker: offline interface, updates, cover cache | MIT |
-| ✳️ | [Bootstrap Icons](https://icons.getbootstrap.com) | Icons | MIT |
-| 🔤 | [Archivo](https://github.com/Omnibus-Type/Archivo) via [Fontsource](https://fontsource.org/fonts/archivo) | Variable typeface (width and weight) | OFL-1.1 |
+| Tool | Used for | License |
+| --- | --- | --- |
+| [![Alpine.js](https://img.shields.io/badge/Alpine.js-2D3441?style=for-the-badge&logo=alpinedotjs&logoColor=8BC0D0)](https://alpinejs.dev) | reactive interface without a build step | [MIT](https://github.com/alpinejs/alpine/blob/main/LICENSE.md) |
+| [![Alpine Persist](https://img.shields.io/badge/Alpine%20Persist-2D3441?style=for-the-badge&logo=alpinedotjs&logoColor=8BC0D0)](https://alpinejs.dev/plugins/persist) | track list kept across reloads | [MIT](https://github.com/alpinejs/alpine/blob/main/LICENSE.md) |
+| [![i18next](https://img.shields.io/badge/i18next-26A69A?style=for-the-badge&logo=i18next&logoColor=white)](https://www.i18next.com) | French and English translations, plurals included | [MIT](https://github.com/i18next/i18next/blob/master/LICENSE) |
+| [![i18next language detector](https://img.shields.io/badge/i18next%20language%20detector-26A69A?style=for-the-badge&logo=i18next&logoColor=white)](https://github.com/i18next/i18next-browser-languageDetector) | picks the visitor's language and remembers the choice | [MIT](https://github.com/i18next/i18next-browser-languageDetector/blob/master/LICENSE) |
+| [![Workbox](https://img.shields.io/badge/Workbox-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)](https://developer.chrome.com/docs/workbox) | service worker: offline interface, updates, cover cache | [MIT](https://github.com/GoogleChrome/workbox/blob/v7/LICENSE) |
+| [![Bootstrap Icons](https://img.shields.io/badge/Bootstrap%20Icons-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)](https://icons.getbootstrap.com) | icons | [MIT](https://github.com/twbs/icons/blob/main/LICENSE) |
+| [![Archivo](https://img.shields.io/badge/Archivo-C4161C?style=for-the-badge&logo=googlefonts&logoColor=white)](https://github.com/Omnibus-Type/Archivo) | variable typeface with width and weight axes, files from Fontsource | [OFL-1.1](https://github.com/Omnibus-Type/Archivo/blob/master/OFL.txt) |
 
 Every frontend library is vendored in `platine/static/vendor/` with its license: no CDN, no build step.
 
 ### Quality
 
-| | Tool | Role in Platine | License |
-| --- | --- | --- | --- |
-| 🧪 | [pytest](https://github.com/pytest-dev/pytest) + [pytest-cov](https://github.com/pytest-dev/pytest-cov) / [coverage.py](https://github.com/coveragepy/coveragepy) | Python tests, 100 % line and branch coverage required | MIT / Apache-2.0 |
-| 🦕 | [Deno test](https://docs.deno.com/runtime/fundamentals/testing/) | Frontend tests and coverage, no Node needed | MIT |
-| 🧹 | [Ruff](https://github.com/astral-sh/ruff) | Lint and formatting | MIT |
-| 🔍 | [Pylint](https://github.com/pylint-dev/pylint) + [per-file-ignores](https://github.com/SAP/pylint-per-file-ignores) | Deeper static analysis, 10/10 | GPL-2.0-or-later / MIT |
-| 🧷 | [mypy](https://github.com/python/mypy) | Static typing | MIT |
-| 🎭 | [Responses](https://github.com/getsentry/responses), [HTTPX2](https://github.com/pydantic/httpx2) | Fake HTTP for tests, FastAPI test client | Apache-2.0 / BSD-3-Clause |
-| 🏅 | [genbadge](https://github.com/smarie/python-genbadge) + [lcov-cobertura](https://github.com/eriwen/lcov-to-cobertura-xml) | Coverage badges published to GitHub Pages | BSD-3-Clause / Apache-2.0 |
-| 🪝 | [pre-commit](https://pre-commit.com) | Same checks before each commit | MIT |
+| Tool | Used for | License |
+| --- | --- | --- |
+| [![pytest](https://img.shields.io/badge/pytest-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)](https://docs.pytest.org) | Python unit tests | [MIT](https://github.com/pytest-dev/pytest/blob/main/LICENSE) |
+| [![pytest-cov](https://img.shields.io/badge/pytest--cov-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/pytest-dev/pytest-cov) | coverage while testing, 100 % required | [MIT](https://github.com/pytest-dev/pytest-cov/blob/master/LICENSE) |
+| [![Coverage.py](https://img.shields.io/badge/Coverage.py-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://coverage.readthedocs.io) | line and branch measurement, HTML and lcov reports | [Apache-2.0](https://github.com/coveragepy/coveragepy/blob/main/LICENSE.txt) |
+| [![Ruff](https://img.shields.io/badge/Ruff-261230?style=for-the-badge&logo=ruff&logoColor=D7FF64)](https://docs.astral.sh/ruff) | lint and formatting | [MIT](https://github.com/astral-sh/ruff/blob/main/LICENSE) |
+| [![Pylint](https://img.shields.io/badge/Pylint-1F5A96?style=for-the-badge&logo=python&logoColor=white)](https://pylint.readthedocs.io) | deeper static analysis, rated 10/10 | [GPL-2.0-or-later](https://github.com/pylint-dev/pylint/blob/main/LICENSE) |
+| [![pylint-per-file-ignores](https://img.shields.io/badge/pylint--per--file--ignores-1F5A96?style=for-the-badge&logo=python&logoColor=white)](https://github.com/SAP/pylint-per-file-ignores) | pytest-specific exceptions for the tests folder only | [MIT](https://github.com/SAP/pylint-per-file-ignores/blob/main/LICENSE) |
+| [![mypy](https://img.shields.io/badge/mypy-2A6DB2?style=for-the-badge&logo=python&logoColor=white)](https://mypy-lang.org) | static type checking | [MIT](https://github.com/python/mypy/blob/master/LICENSE) |
+| [![Responses](https://img.shields.io/badge/Responses-362D59?style=for-the-badge&logo=sentry&logoColor=white)](https://github.com/getsentry/responses) | fake HTTP answers in tests | [Apache-2.0](https://github.com/getsentry/responses/blob/master/LICENSE) |
+| [![HTTPX2](https://img.shields.io/badge/HTTPX2-E92063?style=for-the-badge&logo=python&logoColor=white)](https://github.com/pydantic/httpx2) | HTTP client behind the FastAPI test client | [BSD-3-Clause](https://github.com/pydantic/httpx2/blob/main/LICENSE.md) |
+| [![genbadge](https://img.shields.io/badge/genbadge-4C1?style=for-the-badge&logo=shieldsdotio&logoColor=white)](https://github.com/smarie/python-genbadge) | coverage badges published to GitHub Pages | [BSD-3-Clause](https://github.com/smarie/python-genbadge/blob/main/LICENSE) |
+| [![lcov-cobertura](https://img.shields.io/badge/lcov--cobertura-4C1?style=for-the-badge&logo=python&logoColor=white)](https://github.com/eriwen/lcov-to-cobertura-xml) | turns the JavaScript lcov report into the badge format | [Apache-2.0](https://github.com/eriwen/lcov-to-cobertura-xml/blob/master/LICENSE) |
+| [![pre-commit](https://img.shields.io/badge/pre--commit-FAB040?style=for-the-badge&logo=precommit&logoColor=black)](https://pre-commit.com) | the same checks before each commit | [MIT](https://github.com/pre-commit/pre-commit/blob/main/LICENSE) |
 
 ### Delivery
 
-| | Tool | Role in Platine | License |
-| --- | --- | --- | --- |
-| ⚙️ | [uv](https://github.com/astral-sh/uv) | Dependencies and lock file | MIT / Apache-2.0 |
-| 🦭 | [Podman](https://podman.io) / [Docker](https://www.docker.com) | Container image and compose | Apache-2.0 |
-| ☸️ | [Helm](https://helm.sh) + [Kubernetes](https://kubernetes.io) | Chart with Ingress or Gateway API, NetworkPolicy, ServiceMonitor | Apache-2.0 |
-| ✅ | [kubeconform](https://github.com/yannh/kubeconform) | Validates the rendered manifests in CI | Apache-2.0 |
-| 🚀 | [GitHub Actions](https://github.com/features/actions) + [Dependabot](https://docs.github.com/code-security/dependabot) | CI, image and chart publishing, weekly yt-dlp updates | |
+| Tool | Used for | License |
+| --- | --- | --- |
+| [![uv](https://img.shields.io/badge/uv-DE5FE9?style=for-the-badge&logo=uv&logoColor=white)](https://docs.astral.sh/uv) | dependencies, lock file and virtual environment | [MIT](https://github.com/astral-sh/uv/blob/main/LICENSE-MIT) / [Apache-2.0](https://github.com/astral-sh/uv/blob/main/LICENSE-APACHE) |
+| [![Hatchling](https://img.shields.io/badge/Hatchling-4051B5?style=for-the-badge&logo=python&logoColor=white)](https://hatch.pypa.io) | builds the Python package | [MIT](https://github.com/pypa/hatch/blob/master/LICENSE.txt) |
+| [![Podman](https://img.shields.io/badge/Podman-892CA0?style=for-the-badge&logo=podman&logoColor=white)](https://podman.io) | container image, read-only and rootless | [Apache-2.0](https://github.com/podman-container-tools/podman/blob/main/LICENSE) |
+| [![Docker Compose](https://img.shields.io/badge/Docker%20Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/compose/) | the same compose file works with Docker | [Apache-2.0](https://github.com/docker/compose/blob/main/LICENSE) |
+| [![Helm](https://img.shields.io/badge/Helm-0F1689?style=for-the-badge&logo=helm&logoColor=white)](https://helm.sh) | Kubernetes chart, published as an OCI artifact | [Apache-2.0](https://github.com/helm/helm/blob/main/LICENSE) |
+| [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](https://kubernetes.io) | Ingress or Gateway API, NetworkPolicy, ServiceMonitor | [Apache-2.0](https://github.com/kubernetes/kubernetes/blob/master/LICENSE) |
+| [![kubeconform](https://img.shields.io/badge/kubeconform-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](https://github.com/yannh/kubeconform) | validates the rendered manifests in CI | [Apache-2.0](https://github.com/yannh/kubeconform/blob/master/LICENSE) |
+
+CI runs on GitHub Actions, and Dependabot proposes dependency updates every week, yt-dlp first.
 
 ## Getting started
 
