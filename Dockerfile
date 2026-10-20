@@ -1,6 +1,6 @@
 # Platine image, builds with Podman and Docker. Fully qualified base image: Podman on Fedora
 # rejects short names ("python:3.14-slim") without an explicit registry.
-FROM docker.io/library/python:3.14-slim
+FROM docker.io/library/python:3.15-slim
 
 LABEL org.opencontainers.image.title="Platine" \
       org.opencontainers.image.description="Platine: paste a link, get a 320 kbps MP3: YouTube, YouTube Music, SoundCloud, Spotify and hundreds of other sites (yt-dlp + ffmpeg)" \
