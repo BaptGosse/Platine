@@ -1,0 +1,12 @@
+# Trivy findings reviewed and accepted, with the reason.
+
+# Helm chart, ConfigMap: the flagged keys (PLATINE_FILE_TTL, PLATINE_MAX_QUEUED...) hold tuning
+# numbers, not secrets.
+KSV-01010
+# Helm chart: no CPU limit on purpose, it would throttle ffmpeg during conversions. The CPU
+# request keeps scheduling fair and the memory limit still applies.
+KSV-0011
+# Helm chart: the scan renders the chart without a namespace, `helm install -n` sets one.
+KSV-0110
+# Helm chart: the image is published on ghcr.io, which is not on Trivy's built-in trusted list.
+KSV-0125

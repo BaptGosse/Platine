@@ -102,6 +102,7 @@ Every frontend library is vendored in `platine/static/vendor/` with its license:
 | [![HTTPX2](https://img.shields.io/badge/HTTPX2-E92063?style=for-the-badge&logo=python&logoColor=white)](https://github.com/pydantic/httpx2) | HTTP client behind the FastAPI test client | [BSD-3-Clause](https://github.com/pydantic/httpx2/blob/main/LICENSE.md) |
 | [![genbadge](https://img.shields.io/badge/genbadge-4C1?style=for-the-badge&logo=shieldsdotio&logoColor=white)](https://github.com/smarie/python-genbadge) | coverage badges published to GitHub Pages | [BSD-3-Clause](https://github.com/smarie/python-genbadge/blob/main/LICENSE) |
 | [![lcov-cobertura](https://img.shields.io/badge/lcov--cobertura-4C1?style=for-the-badge&logo=python&logoColor=white)](https://github.com/eriwen/lcov-to-cobertura-xml) | turns the JavaScript lcov report into the badge format | [Apache-2.0](https://github.com/eriwen/lcov-to-cobertura-xml/blob/master/LICENSE) |
+| [![Trivy](https://img.shields.io/badge/Trivy-1904DA?style=for-the-badge&logo=trivy&logoColor=white)](https://trivy.dev) | known CVEs in the dependencies and the image, leaked secrets, Dockerfile and chart misconfigurations | [Apache-2.0](https://github.com/aquasecurity/trivy/blob/main/LICENSE) |
 | [![pre-commit](https://img.shields.io/badge/pre--commit-FAB040?style=for-the-badge&logo=precommit&logoColor=black)](https://pre-commit.com) | the same checks before each commit | [MIT](https://github.com/pre-commit/pre-commit/blob/main/LICENSE) |
 
 ### Delivery
@@ -116,7 +117,8 @@ Every frontend library is vendored in `platine/static/vendor/` with its license:
 | [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](https://kubernetes.io) | Ingress or Gateway API, NetworkPolicy, ServiceMonitor | [Apache-2.0](https://github.com/kubernetes/kubernetes/blob/master/LICENSE) |
 | [![kubeconform](https://img.shields.io/badge/kubeconform-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](https://github.com/yannh/kubeconform) | validates the rendered manifests in CI | [Apache-2.0](https://github.com/yannh/kubeconform/blob/master/LICENSE) |
 
-CI runs on GitHub Actions, and Dependabot proposes dependency updates every week, yt-dlp first.
+CI runs on GitHub Actions, with every action pinned to a commit SHA. Dependabot proposes dependency updates
+every week, yt-dlp first.
 
 ## Getting started
 
@@ -200,6 +202,8 @@ browser, or a proxy, solve it.
 make check              # ruff, pylint, mypy, Python and JS tests with 100 % coverage gates, helm lint
 make coverage           # HTML reports and badges in coverage/
 make test-network       # real YouTube, SoundCloud and Spotify conversions (slow)
+make scan               # Trivy: dependencies, secrets, Dockerfile and chart
+make scan-image         # Trivy: the built image (Debian packages, Python packages, secrets)
 make fmt                # fixes the style
 ```
 
@@ -208,9 +212,14 @@ make fmt                # fixes the style
 - **Interface**: 45 tests run with `deno test` on the application logic (`lib.js`, `component.js`, `i18n.js`),
   100 % covered, plus checks that the French and English translations have the same keys.
   `main.js` (browser bootstrap) and `sw.js` (service worker) are checked in a real browser instead.
-- **CI**: every push runs all of the above, validates the chart with kubeconform, publishes the coverage reports
-  to <https://baptgosse.github.io/Platine/>, pushes the image to GHCR from `main`, and publishes the chart as
-  an OCI artifact on each `v*` tag.
+- **Security**: Trivy fails the build on any HIGH or CRITICAL issue that has a fix, in the dependencies, the
+  image, the Dockerfile or the chart, and on leaked secrets. Settings live in `trivy.yaml`, and every accepted
+  finding is listed with its reason in `.trivyignore` and `trivy-secret.yaml`. The image drops pip and applies
+  the Debian security updates at build time.
+- **CI**: every push runs all of the above, validates the chart with kubeconform, sends the full Trivy reports
+  to the GitHub Security tab, publishes the coverage reports to <https://baptgosse.github.io/Platine/>, pushes
+  the image to GHCR from `main` once it passed the scan, and publishes the chart as an OCI artifact on each
+  `v*` tag.
 
 ### When a site breaks
 
@@ -237,6 +246,7 @@ tests/              Python tests, and tests/js for the interface
 scripts/            coverage gate used by make and CI
 charts/platine/     Helm chart
 Dockerfile, compose.yaml, Makefile, .github/
+trivy.yaml          Trivy settings, with .trivyignore and trivy-secret.yaml for reviewed findings
 ```
 
 ## License

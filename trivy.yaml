@@ -1,0 +1,20 @@
+# Trivy settings shared by `make scan` and CI: fail on HIGH and CRITICAL issues that have a fix.
+# Known vulnerabilities in the dependencies (uv.lock, image packages), leaked secrets and
+# misconfigurations (Dockerfile, Helm chart).
+severity:
+  - HIGH
+  - CRITICAL
+exit-code: 1
+scan:
+  scanners:
+    - vuln
+    - secret
+    - misconfig
+  skip-dirs:
+    - .venv
+    - coverage
+    - .mypy_cache
+    - .pytest_cache
+    - .ruff_cache
+vulnerability:
+  ignore-unfixed: true

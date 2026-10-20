@@ -21,3 +21,7 @@ Makefile
 compose.yaml
 cookies.txt
 *.mp3
+.scan
+trivy.yaml
+trivy-secret.yaml
+.trivyignore

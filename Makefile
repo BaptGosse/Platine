@@ -11,6 +11,7 @@ NAMESPACE ?= platine
 CHART     := charts/platine
 HELM_ARGS ?=
 PORT      ?= 8320
+TRIVY     ?= trivy
 COV       := coverage
 # First-party browser code: main.js (bootstrap) and sw.js (service worker) are not unit-tested.
 JS_COV    := --include='platine/static/js/' --exclude='main\.js'
@@ -29,7 +30,7 @@ endif
 .DEFAULT_GOAL := help
 .PHONY: help install dev test test-network test-js lint fmt typecheck check update-ytdlp \
 	    coverage coverage-python coverage-js coverage-badges \
-	    image run up down logs push helm-lint helm-template helm-install
+	    image run up down logs push scan scan-image helm-lint helm-template helm-install
 
 help: ## Show this help
 	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "  \033[1m%-16s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -125,6 +126,17 @@ logs: ## Follow compose logs
 push: image ## Push the image to REGISTRY/platine:TAG (default ghcr.io/baptgosse)
 	$(CONTAINER) tag $(IMAGE):$(TAG) $(REGISTRY)/platine:$(TAG)
 	$(CONTAINER) push $(REGISTRY)/platine:$(TAG)
+
+# --- Security ----------------------------------------------------------------
+
+scan: ## Scan dependencies, secrets, Dockerfile and chart for known issues (Trivy)
+	$(TRIVY) fs --config trivy.yaml .
+
+# The image goes through a tar file on disk: no container socket needed, and /tmp is often in RAM.
+scan-image: image ## Scan the image for known vulnerabilities and secrets (Trivy)
+	@rm -rf .scan && mkdir .scan && trap 'rm -rf .scan' EXIT && \
+	    $(CONTAINER) save -q -o .scan/image.tar $(IMAGE):$(TAG) && \
+	    $(TRIVY) image --config trivy.yaml --scanners vuln,secret --input .scan/image.tar
 
 # --- Kubernetes --------------------------------------------------------------
 

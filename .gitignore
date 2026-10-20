@@ -11,6 +11,9 @@ __pycache__/
 coverage/
 htmlcov/
 
+# Image tarball written by `make scan-image`
+.scan/
+
 # Downloaded audio and local secrets
 *.mp3
 cookies.txt

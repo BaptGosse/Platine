@@ -12,10 +12,15 @@ updates:
       python:
         patterns: ["*"]
         exclude-patterns: ["yt-dlp*"]
+  # Actions are pinned to a commit SHA, with the version in a comment that Dependabot keeps
+  # up to date. One pull request for all of them.
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
   - package-ecosystem: docker
     directory: /
     schedule:
