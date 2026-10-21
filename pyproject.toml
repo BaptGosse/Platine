@@ -78,7 +78,9 @@ ignore_missing_imports = true
 
 [tool.pylint.main]
 py-version = "3.12"
-jobs = 0
+# One process: parallel runs go through dill, which does not support Python 3.15 yet. Fast enough
+# for this codebase, and light on RAM.
+jobs = 1
 load-plugins = ["pylint_per_file_ignores"]
 
 [tool.pylint.format]
