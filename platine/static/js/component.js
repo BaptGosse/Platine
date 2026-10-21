@@ -9,6 +9,13 @@ const POLL_ACTIVE_MS = 700;
 const POLL_IDLE_MS = 2000;
 const CLOCK_MS = 15_000;
 
+/** The DMCA and legal notice: same page, shown instead of the converter on this path. */
+export const LEGAL_PATH = "/dmca";
+export const LEGAL_SECTIONS = ["hosting", "privateCopy", "lawful", "responsibility", "noIncitement", "takedown", "license"];
+
+/** Browser bar color of each theme, for the <meta name="theme-color"> tags (one per system scheme). */
+const THEME_COLORS = { light: "#be161e", dark: "#2a0709" };
+
 /** An error the interface knows how to translate: a server code or one of its own. */
 export class ApiError extends Error {
   constructor(code, message = "", values = undefined) {
@@ -46,9 +53,10 @@ export function createApi(fetch) {
 }
 
 /**
- * `env` provides: fetch, persist(initial, key), i18n (an i18next instance), window (events),
- * document (title and <html lang>), navigator (onLine), location, history, createWorkbox(url)
- * or null when service workers are unavailable, setTimeout, setInterval, now() and download(url).
+ * `env` provides: fetch, persist(initial, key), i18n (an i18next instance), window (events and
+ * matchMedia), document (title, <html> attributes and theme-color tags), navigator (onLine),
+ * location, history, createWorkbox(url) or null when service workers are unavailable,
+ * setTimeout, setInterval, now() and download(url).
  */
 export function createPlatine(env) {
   const request = createApi(env.fetch);
@@ -73,17 +81,27 @@ export function createPlatine(env) {
     updateReady: false,
     lang: env.i18n.resolvedLanguage ?? "en",
     languages: LANGUAGES,
+    legal: env.location.pathname === LEGAL_PATH,
+    // "light" or "dark" when picked with the header button, null to follow the system.
+    theme: env.persist(null, "platine:theme"),
+    systemDark: false,
+    legalSections: LEGAL_SECTIONS,
 
     init() {
       // No automatic download for conversions started before the page was reloaded.
       for (const job of this.jobs) job.autoSave = false;
       env.document.documentElement.lang = this.lang;
+      const darkScheme = env.window.matchMedia("(prefers-color-scheme: dark)");
+      this.systemDark = darkScheme.matches;
+      darkScheme.addEventListener("change", (event) => (this.systemDark = event.matches));
+      this.applyTheme();
       request("/api/config")
         .then((config) => (this.fileTtl = config.file_ttl))
         .catch(() => {});
       this.refresh(true).finally(() => this.poll());
       env.setInterval(() => (this.now = env.now()), CLOCK_MS);
-      this.$watch("activeCount", (n) => (env.document.title = n ? `(${n}) Platine` : "Platine"));
+      env.document.title = this.pageTitle;
+      this.$watch("pageTitle", (title) => (env.document.title = title));
       this.setUpApp();
 
       // A link received from the bookmarklet or the Android share sheet (?url=… or ?text=…).
@@ -115,6 +133,10 @@ export function createPlatine(env) {
     get bookmarklet() {
       return lib.bookmarklet(env.location.origin);
     },
+    get pageTitle() {
+      const page = this.legal ? `${this.t("legal.title")} | Platine` : "Platine";
+      return this.activeCount ? `(${this.activeCount}) ${page}` : page;
+    },
 
     // Language ---------------------------------------------------------------------
 
@@ -135,6 +157,28 @@ export function createPlatine(env) {
       this.lang = code;
       env.document.documentElement.lang = code;
       env.i18n.changeLanguage(code); // the language detector also remembers the choice
+    },
+
+    // Theme ------------------------------------------------------------------------
+
+    get dark() {
+      return (this.theme ?? (this.systemDark ? "dark" : "light")) === "dark";
+    },
+
+    /** Switches theme. Picking the system's own theme goes back to following the system. */
+    toggleTheme() {
+      const next = this.dark ? "light" : "dark";
+      this.theme = next === (this.systemDark ? "dark" : "light") ? null : next;
+      this.applyTheme();
+    },
+
+    applyTheme() {
+      const root = env.document.documentElement;
+      if (this.theme) root.dataset.theme = this.theme;
+      else delete root.dataset.theme;
+      for (const meta of env.document.querySelectorAll('meta[name="theme-color"]')) {
+        meta.content = THEME_COLORS[this.theme ?? meta.dataset.scheme];
+      }
     },
 
     // Installable app (PWA) ----------------------------------------------------------

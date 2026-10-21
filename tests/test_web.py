@@ -176,6 +176,8 @@ def test_config_health_metrics_and_page(client: TestClient) -> None:
     assert "platine_jobs_active" in client.get("/metrics").text
     page = client.get("/")
     assert page.status_code == 200 and "<title>Platine</title>" in page.text
+    legal = client.get("/dmca")  # the interface shows the DMCA and legal notice on this path
+    assert legal.status_code == 200 and legal.text == page.text
 
 
 def basic(credentials: bytes) -> dict[str, str]:

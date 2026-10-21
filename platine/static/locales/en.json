@@ -4,7 +4,9 @@
   },
   "header": {
     "install": "Install the app",
-    "language": "Language"
+    "language": "Language",
+    "lightTheme": "Switch to the light theme",
+    "darkTheme": "Switch to the dark theme"
   },
   "hero": {
     "title": "Paste a link.",
@@ -59,7 +61,42 @@
     "about": "320 kbps MP3 with title, artist and cover. Files stay available for {{ttl}} after the conversion. For Spotify, the details come from Spotify and the audio from YouTube Music.",
     "shortcutBefore": "Shortcut: drag",
     "bookmarklet": "Convert with Platine",
-    "shortcutAfter": "to your bookmarks bar, then click it from any music or video page."
+    "shortcutAfter": "to your bookmarks bar, then click it from any music or video page.",
+    "legal": "DMCA and legal notice"
+  },
+  "legal": {
+    "title": "DMCA and legal notice",
+    "back": "Back to conversions",
+    "intro": "Platine is free, open source software that anyone can run on their own computer or server. It converts into MP3 the links its user submits, for that user only.",
+    "hosting": {
+      "title": "No content is hosted",
+      "body": "Platine hosts, indexes, shares and publishes no audio or video. It has no catalogue and no search engine: it only converts the links its user submits. Each file is created on the server of the instance, only for the person who asked for it, and deleted {{ttl}} after the conversion."
+    },
+    "privateCopy": {
+      "title": "The private copy exception",
+      "body": "In France, the private copy exception (article L122-5 of the Intellectual Property Code) lets you copy a work for your strictly private use, in return for the private copy levy charged on storage media. It covers copies made from a lawful source and kept for your own use, and it does not allow bypassing a technical protection measure (DRM). Many other countries have a similar exception, each with its own conditions, and some have none: check the law that applies where you live."
+    },
+    "lawful": {
+      "title": "A lawful use",
+      "body": "Platine offers no content, makes nothing available to the public and refuses DRM-protected media. It can be used lawfully, for content you have the rights to, or within the limits of the private copy exception where it exists. Whether a copy is lawful depends on its source and on the law of your country."
+    },
+    "responsibility": {
+      "title": "Your responsibility",
+      "body": "You alone choose what you convert, and you answer for it. Only download content you have the rights to: your own works, content whose license allows it, or a personal copy of a work you lawfully own, for example a record you bought, where the law allows it. The authors of Platine are not responsible for how it is used."
+    },
+    "noIncitement": {
+      "title": "No incitement",
+      "body": "Platine does not encourage anyone to download content without the permission of its rights holders, and promotes no protected work. Many sites, YouTube and Spotify included, also forbid downloads in their terms of service."
+    },
+    "takedown": {
+      "title": "DMCA and takedown requests",
+      "body": "Since Platine keeps no file longer than {{ttl}} and publishes nothing, the project has nothing to take down. Every Platine instance is independent and run by whoever installed it: if you believe one of them infringes your rights, contact the person or company that runs it."
+    },
+    "license": {
+      "title": "License",
+      "body": "Platine is released under the MIT license and provided as is, without warranty of any kind."
+    },
+    "note": "This page sums up the legal framework as we understand it. It is not legal advice."
   },
   "notices": {
     "offline": "Offline. Your tracks stay here, conversions resume when you're back online.",

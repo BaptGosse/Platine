@@ -69,21 +69,50 @@ function fakeWorkbox() {
 }
 
 /** Everything the component needs from the browser, plus handles to inspect what it did. */
-export async function fakeEnv({ routes = {}, lng = "en", search = "", groups = [], serviceWorker = true } = {}) {
+export async function fakeEnv({
+  routes = {},
+  lng = "en",
+  search = "",
+  pathname = "/",
+  groups = [],
+  theme = null,
+  systemDark = false,
+  serviceWorker = true,
+} = {}) {
   const i18n = await createI18n(lng);
   const { fetch, calls } = fakeFetch(routes);
   const workbox = serviceWorker ? fakeWorkbox() : null;
+  const stored = { "platine:groups": groups.length ? groups : null, "platine:theme": theme };
+  // The system color scheme: dispatch a "change" event with `matches` to switch it.
+  const darkScheme = Object.assign(new EventTarget(), { matches: systemDark });
+  const window = Object.assign(new EventTarget(), {
+    matchMedia(query) {
+      fake.mediaQuery = query;
+      return darkScheme;
+    },
+  });
+  const metas = [
+    { content: "#be161e", dataset: { scheme: "light" } },
+    { content: "#2a0709", dataset: { scheme: "dark" } },
+  ];
   const fake = {
     calls,
     workbox,
     i18n,
     clock: NOW,
-    persistedKey: null,
+    persistedKeys: [],
+    mediaQuery: null,
+    darkScheme,
     timeouts: [],
     intervals: [],
     downloads: [],
-    window: new EventTarget(),
-    document: { title: "Platine", documentElement: { lang: "" } },
+    window,
+    document: {
+      title: "Platine",
+      documentElement: { lang: "", dataset: {} },
+      metas,
+      querySelectorAll: (selector) => (selector === 'meta[name="theme-color"]' ? metas : []),
+    },
     history: {
       urls: [],
       replaceState(_state, _title, url) {
@@ -92,7 +121,7 @@ export async function fakeEnv({ routes = {}, lng = "en", search = "", groups = [
     },
     location: {
       search,
-      pathname: "/",
+      pathname,
       origin: "https://platine.example",
       reloads: 0,
       reload() {
@@ -109,8 +138,8 @@ export async function fakeEnv({ routes = {}, lng = "en", search = "", groups = [
     location: fake.location,
     navigator: { onLine: true },
     persist(initial, key) {
-      fake.persistedKey = key;
-      return groups.length ? groups : initial;
+      fake.persistedKeys.push(key);
+      return stored[key] ?? initial;
     },
     createWorkbox: serviceWorker
       ? (url) => {

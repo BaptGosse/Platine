@@ -18,6 +18,11 @@ as 320 kbps MP3 files with title, artist, album and cover.</p>
   <img src="platine/static/brand/screenshot-wide.png" alt="A playlist being converted in Platine" width="760">
 </p>
 
+<p align="center">
+  <img src="platine/static/brand/screenshot-dark.png" alt="Platine in its dark theme" width="374">
+  <img src="platine/static/brand/screenshot-dmca.png" alt="The DMCA and legal notice page" width="374">
+</p>
+
 ## Features
 
 - **One link is enough**: paste it and the conversion starts. Several links at once, drag and drop, a bookmarklet
@@ -29,6 +34,7 @@ as 320 kbps MP3 files with title, artist, album and cover.</p>
 - **Live progress**: every track is a record that spins while it converts, with its progress drawn around it.
   Cancel, retry and remove work track by track, and the list survives a reload.
 - **French and English** interface, switchable at any time.
+- **Red or dark theme**: follows the system, or a button in the header picks one and remembers it.
 - **Installable app (PWA)**: home screen icon, interface available offline, update offered when a new version is deployed.
 - **Command line**: `platine download LINK...` with progress bars.
 - **Production ready**: non-root read-only container, Helm chart, Prometheus metrics, optional password,
@@ -42,6 +48,9 @@ as 320 kbps MP3 files with title, artist, album and cover.</p>
 > or, where the law of your country provides a private copy exception, a personal copy of content you lawfully
 > own (for example music you bought). Downloading copyrighted content without permission is illegal in most
 > countries, and many sites, YouTube and Spotify included, forbid downloads in their terms of service.
+
+The web interface links to the same notice from its footer: a DMCA and legal notice page at `/dmca`, in French
+and English, which also explains the private copy exception.
 
 ## Tech stack
 
@@ -183,6 +192,11 @@ The chart offers an Ingress or an HTTPRoute (Gateway API), a NetworkPolicy that 
 (Platine downloads arbitrary links), a ServiceMonitor, and authentication and cookies from Secrets.
 Conversions are kept in memory: stay at **one replica**.
 
+> [!IMPORTANT]
+> Keep your instance private. As soon as it can be reached from outside, turn on the password
+> (`auth.enabled` in the chart, `PLATINE_AUTH_PASSWORD` otherwise) and do not advertise it: a conversion site
+> open to everyone is exactly what rights holders go after.
+
 ## Releases
 
 Every push on `main` that passes CI is a release, numbered automatically: the last tag plus one patch
@@ -228,7 +242,7 @@ make fmt                # fixes the style
 
 - **Python**: 103 unit tests, 100 % of lines, functions and branches. yt-dlp, Spotify and YouTube Music are faked,
   so no network access is needed. Ruff, Pylint (10/10) and mypy all pass.
-- **Interface**: 45 tests run with `deno test` on the application logic (`lib.js`, `component.js`, `i18n.js`),
+- **Interface**: 49 tests run with `deno test` on the application logic (`lib.js`, `component.js`, `i18n.js`),
   100 % covered, plus checks that the French and English translations have the same keys.
   `main.js` (browser bootstrap) and `sw.js` (service worker) are checked in a real browser instead.
 - **Security**: Trivy fails the build on any HIGH or CRITICAL issue that has a fix, in the dependencies, the

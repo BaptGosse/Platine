@@ -1,6 +1,6 @@
 // The Platine Alpine component, driven like Alpine would, against a fake browser and server.
 import assert from "node:assert/strict";
-import { ApiError, createApi, createPlatine } from "../../platine/static/js/component.js";
+import { ApiError, createApi, createPlatine, LEGAL_PATH, LEGAL_SECTIONS } from "../../platine/static/js/component.js";
 import { errorResponse, fakeEnv, flush, job, jsonResponse, mount, NNBSP, NOW } from "./helpers.js";
 
 const created = (jobs, playlist = null) => jsonResponse({ playlist, jobs }, 201);
@@ -55,7 +55,7 @@ Deno.test("init restores the list, reads the config, polls and follows the title
     },
   });
   const { component, watchers } = mount(fake.env);
-  assert.equal(fake.persistedKey, "platine:groups");
+  assert.deepEqual(fake.persistedKeys, ["platine:groups", "platine:theme"]);
 
   component.init();
   await flush();
@@ -67,15 +67,71 @@ Deno.test("init restores the list, reads the config, polls and follows the title
   assert.equal(fake.timeouts.at(-1).ms, 700); // something is still converting
   assert.deepEqual(fake.history.urls, []);
 
-  watchers.activeCount(2);
-  assert.equal(fake.document.title, "(2) Platine");
-  watchers.activeCount(0);
+  assert.equal(component.legal, false);
+  assert.equal(component.pageTitle, "(1) Platine");
+  assert.equal(fake.document.title, "(1) Platine"); // set at start-up, then by the watcher
+  watchers.pageTitle("Platine");
   assert.equal(fake.document.title, "Platine");
 
   assert.equal(fake.intervals[0].ms, 15_000);
   fake.clock += 60_000;
   fake.intervals[0].callback();
   assert.equal(component.now, NOW + 60_000);
+});
+
+Deno.test("the theme follows the system until the button picks one", async () => {
+  const fake = await fakeEnv();
+  const { component } = mount(fake.env);
+  const themeColors = () => fake.document.metas.map((meta) => meta.content);
+  component.init();
+
+  assert.equal(fake.mediaQuery, "(prefers-color-scheme: dark)");
+  assert.equal(component.dark, false);
+  assert.equal("theme" in fake.document.documentElement.dataset, false);
+  assert.deepEqual(themeColors(), ["#be161e", "#2a0709"]);
+
+  component.toggleTheme(); // light system: dark is picked by hand and remembered
+  assert.equal(component.theme, "dark");
+  assert.equal(component.dark, true);
+  assert.equal(fake.document.documentElement.dataset.theme, "dark");
+  assert.deepEqual(themeColors(), ["#2a0709", "#2a0709"]);
+
+  component.toggleTheme(); // back to the system's own theme: follow the system again
+  assert.equal(component.theme, null);
+  assert.equal("theme" in fake.document.documentElement.dataset, false);
+  assert.deepEqual(themeColors(), ["#be161e", "#2a0709"]);
+
+  fake.darkScheme.dispatchEvent(Object.assign(new Event("change"), { matches: true }));
+  assert.equal(component.dark, true);
+});
+
+Deno.test("a theme picked earlier wins over the system", async () => {
+  const fake = await fakeEnv({ theme: "light", systemDark: true });
+  const { component } = mount(fake.env);
+  component.init();
+
+  assert.equal(component.dark, false);
+  assert.equal(fake.document.documentElement.dataset.theme, "light");
+  assert.deepEqual(fake.document.metas.map((meta) => meta.content), ["#be161e", "#be161e"]);
+  component.toggleTheme(); // dark is the system's theme
+  assert.equal(component.theme, null);
+  assert.equal(component.dark, true);
+});
+
+Deno.test("the DMCA page shows the legal notice instead of the converter, in the current language", async () => {
+  const fake = await fakeEnv({ pathname: LEGAL_PATH, routes: { "GET /api/config": jsonResponse({ file_ttl: 3600 }) } });
+  const { component } = mount(fake.env);
+  component.init();
+  await flush();
+
+  assert.equal(component.legal, true);
+  assert.deepEqual(component.legalSections, LEGAL_SECTIONS);
+  assert.equal(fake.document.title, "DMCA and legal notice | Platine");
+  component.setLanguage("fr");
+  assert.equal(component.pageTitle, "DMCA et mentions légales | Platine");
+  component.groups.push({ id: "g", playlist: null, jobs: [job({ status: "downloading" })] });
+  assert.equal(component.pageTitle, "(1) DMCA et mentions légales | Platine");
+  assert.ok(component.t("legal.hosting.body", { ttl: component.ttlLabel }).includes(`puis supprimé 1${NNBSP}h après`));
 });
 
 Deno.test("init survives a missing config and an empty list", async () => {

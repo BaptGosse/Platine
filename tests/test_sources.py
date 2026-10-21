@@ -14,7 +14,7 @@ from tests.conftest import FakeYoutubeDL, video_info
         ("https://m.youtube.com/watch?v=x", "YouTube"),
         ("https://youtu.be/x", "YouTube"),
         ("https://music.youtube.com/watch?v=x", "YouTube Music"),
-        ("https://soundcloud.com/forss/flickermood", "SoundCloud"),
+        ("https://soundcloud.com/elektronomia/elektronomia-sky-high", "SoundCloud"),
         ("https://daftpunk.bandcamp.com/album/x", "Bandcamp"),
         ("https://www.radiofrance.fr/emission", "radiofrance.fr"),
         ("file:///etc/passwd", "Link"),

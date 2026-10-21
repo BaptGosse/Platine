@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Platine</title>
   <meta name="description" content="Paste a YouTube, SoundCloud or Spotify link and get a 320 kbps MP3 with title, artist and cover.">
-  <meta name="theme-color" content="#be161e" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#2a0709" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#be161e" media="(prefers-color-scheme: light)" data-scheme="light">
+  <meta name="theme-color" content="#2a0709" media="(prefers-color-scheme: dark)" data-scheme="dark">
   <meta name="application-name" content="Platine">
   <meta name="apple-mobile-web-app-title" content="Platine">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,6 +16,13 @@
   <link rel="preload" href="vendor/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
   <link rel="stylesheet" href="app.css">
+  <script>
+    // Theme picked with the header button, applied before the first paint (component.js then follows it).
+    try {
+      const theme = JSON.parse(localStorage.getItem("platine:theme"));
+      if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+    } catch {}
+  </script>
   <script type="module" src="js/main.js"></script>
 </head>
 <body x-data="platine" x-cloak
@@ -44,6 +51,11 @@
         <button type="button" class="btn btn-outline btn-small" x-show="canInstall" @click="install()">
           <i class="bi bi-box-arrow-in-down" aria-hidden="true"></i> <span class="btn-label" x-text="t('header.install')"></span>
         </button>
+        <button type="button" class="btn-icon theme-toggle" @click="toggleTheme()"
+                :title="t(dark ? 'header.lightTheme' : 'header.darkTheme')"
+                :aria-label="t(dark ? 'header.lightTheme' : 'header.darkTheme')">
+          <i class="bi" :class="dark ? 'bi-sun' : 'bi-moon-stars'" aria-hidden="true"></i>
+        </button>
         <div class="lang-switch" role="group" :aria-label="t('header.language')">
           <template x-for="language in languages" :key="language.code">
             <button type="button" class="lang-option" :lang="language.code" :title="language.name"
@@ -55,7 +67,7 @@
     </header>
 
     <main>
-      <section class="hero" :class="{ dragging }">
+      <section class="hero" :class="{ dragging }" x-show="!legal">
         <h1 x-text="t('hero.title')"></h1>
         <form class="linkform" @submit.prevent="submit()" novalidate>
           <input x-ref="input" x-model="url" @paste="onPaste($event)" @input="error = null"
@@ -73,7 +85,7 @@
         </p>
       </section>
 
-      <section class="crate" x-show="groups.length" :aria-label="t('crate.label')">
+      <section class="crate" x-show="!legal && groups.length" :aria-label="t('crate.label')">
         <div class="crate-tools" x-show="hasFinished">
           <button type="button" class="btn-text" @click="clearFinished()">
             <i class="bi bi-trash3" aria-hidden="true"></i> <span x-text="t('crate.clearFinished')"></span>
@@ -161,6 +173,22 @@
           </div>
         </template>
       </section>
+
+      <!-- DMCA and legal notice, shown on /dmca. -->
+      <article class="legal" x-show="legal">
+        <a class="btn-text legal-back" href="/">
+          <i class="bi bi-arrow-left" aria-hidden="true"></i> <span x-text="t('legal.back')"></span>
+        </a>
+        <h1 x-text="t('legal.title')"></h1>
+        <p class="legal-intro" x-text="t('legal.intro')"></p>
+        <template x-for="section in legalSections" :key="section">
+          <section class="legal-section">
+            <h2 x-text="t(`legal.${section}.title`)"></h2>
+            <p x-text="t(`legal.${section}.body`, { ttl: ttlLabel })"></p>
+          </section>
+        </template>
+        <p class="legal-note" x-text="t('legal.note')"></p>
+      </article>
     </main>
 
     <footer class="colophon">
@@ -169,6 +197,10 @@
         <span x-text="t('footer.shortcutBefore')"></span>
         <a class="bookmarklet" :href="bookmarklet" @click.prevent x-text="t('footer.bookmarklet')"></a>
         <span x-text="t('footer.shortcutAfter')"></span>
+      </p>
+      <p class="legal-link">
+        <i class="bi bi-shield-check" aria-hidden="true"></i>
+        <a href="/dmca" :aria-current="legal ? 'page' : null" x-text="t('footer.legal')"></a>
       </p>
     </footer>
   </div>

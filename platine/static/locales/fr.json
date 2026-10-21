@@ -4,7 +4,9 @@
   },
   "header": {
     "install": "Installer l'app",
-    "language": "Langue"
+    "language": "Langue",
+    "lightTheme": "Passer au thème clair",
+    "darkTheme": "Passer au thème sombre"
   },
   "hero": {
     "title": "Colle un lien.",
@@ -62,7 +64,42 @@
     "about": "MP3 320 kbps avec titre, artiste et pochette. Les fichiers restent disponibles {{ttl}} après la conversion. Pour Spotify, les infos viennent de Spotify et le son de YouTube Music.",
     "shortcutBefore": "Raccourci : glisse",
     "bookmarklet": "Convertir avec Platine",
-    "shortcutAfter": "dans ta barre de favoris, puis clique dessus depuis n'importe quelle page de musique ou de vidéo."
+    "shortcutAfter": "dans ta barre de favoris, puis clique dessus depuis n'importe quelle page de musique ou de vidéo.",
+    "legal": "DMCA et mentions légales"
+  },
+  "legal": {
+    "title": "DMCA et mentions légales",
+    "back": "Retour aux conversions",
+    "intro": "Platine est un logiciel libre et open source, que chacun peut faire tourner sur son ordinateur ou son serveur. Il convertit en MP3 les liens que son utilisateur lui donne, pour lui seul.",
+    "hosting": {
+      "title": "Aucun contenu hébergé",
+      "body": "Platine n'héberge, n'indexe, ne partage et ne publie aucun contenu audio ou vidéo. Il n'a ni catalogue ni moteur de recherche : il convertit seulement les liens que son utilisateur lui donne. Chaque fichier est créé sur le serveur de l'instance, uniquement pour la personne qui l'a demandé, puis supprimé {{ttl}} après la conversion."
+    },
+    "privateCopy": {
+      "title": "L'exception de copie privée",
+      "body": "En France, l'exception de copie privée (article L122-5 du Code de la propriété intellectuelle) te permet de copier une œuvre pour ton usage strictement privé, en contrepartie de la rémunération pour copie privée prélevée sur les supports de stockage. Elle vaut pour une copie faite à partir d'une source licite et réservée à ton usage personnel, et elle ne permet pas de contourner une mesure technique de protection (DRM). Beaucoup d'autres pays prévoient une exception comparable, chacun avec ses propres conditions, et certains n'en ont aucune : renseigne-toi sur la loi qui s'applique chez toi."
+    },
+    "lawful": {
+      "title": "Un usage légal",
+      "body": "Platine ne propose aucun contenu, ne met rien à disposition du public et refuse les médias protégés par DRM. Il peut être utilisé légalement, pour des contenus dont tu as les droits, ou dans les limites de l'exception de copie privée là où elle existe. La légalité d'une copie dépend de sa source et de la loi de ton pays."
+    },
+    "responsibility": {
+      "title": "Ta responsabilité",
+      "body": "C'est toi qui choisis ce que tu convertis, et tu en réponds. Ne télécharge que des contenus dont tu as les droits : tes propres œuvres, des contenus dont la licence le permet, ou la copie personnelle d'une œuvre que tu possèdes légalement, par exemple un disque que tu as acheté, là où la loi le permet. Les auteurs de Platine ne sont pas responsables de l'usage qui en est fait."
+    },
+    "noIncitement": {
+      "title": "Aucune incitation",
+      "body": "Platine n'incite personne à télécharger des contenus sans l'accord de leurs ayants droit, et ne fait la promotion d'aucune œuvre protégée. Beaucoup de sites, dont YouTube et Spotify, interdisent aussi le téléchargement dans leurs conditions d'utilisation."
+    },
+    "takedown": {
+      "title": "DMCA et demandes de retrait",
+      "body": "Comme Platine ne garde aucun fichier plus de {{ttl}} et ne publie rien, le projet n'a rien à retirer. Chaque instance de Platine est indépendante et gérée par la personne qui l'a installée : si tu penses que l'une d'elles porte atteinte à tes droits, contacte la personne ou l'entreprise qui l'exploite."
+    },
+    "license": {
+      "title": "Licence",
+      "body": "Platine est publié sous licence MIT et fourni tel quel, sans aucune garantie."
+    },
+    "note": "Cette page résume le cadre légal tel que nous le comprenons. Elle ne constitue pas un conseil juridique."
   },
   "notices": {
     "offline": "Hors ligne. Tes morceaux restent là, les conversions reprendront au retour du réseau.",

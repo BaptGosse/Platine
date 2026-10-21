@@ -254,6 +254,12 @@ def _precache_manifest() -> list[dict[str, str]]:
     return entries
 
 
+@app.get("/dmca", include_in_schema=False)
+def legal_page() -> FileResponse:
+    """DMCA and legal notice: the interface shows it instead of the converter on this path."""
+    return FileResponse(STATIC_DIR / "index.html")
+
+
 @app.get("/sw.js", include_in_schema=False)
 def service_worker() -> Response:
     """Service worker script, prefixed with the list of files to precache."""

@@ -1,5 +1,6 @@
 // The English and French translations stay in sync and follow the house style.
 import assert from "node:assert/strict";
+import { LEGAL_SECTIONS } from "../../platine/static/js/component.js";
 import { i18nOptions, LANGUAGES, RESOURCES } from "../../platine/static/js/i18n.js";
 
 const PLURAL_SUFFIX = /_(zero|one|two|few|many|other)$/;
@@ -59,6 +60,17 @@ Deno.test("both languages use the same placeholders", () => {
 Deno.test("every error code is translated", () => {
   for (const lng of Object.keys(flat)) {
     for (const code of ERROR_CODES) assert.ok(`errors.${code}` in flat[lng], `${lng}: errors.${code}`);
+  }
+});
+
+Deno.test("the legal page lists exactly the sections that are translated", () => {
+  const LEGAL_TEXTS = ["title", "back", "intro", "note"];
+  for (const [lng, { translation }] of Object.entries(RESOURCES)) {
+    const sections = Object.keys(translation.legal).filter((key) => !LEGAL_TEXTS.includes(key));
+    assert.deepEqual(sections, LEGAL_SECTIONS, lng);
+    for (const section of LEGAL_SECTIONS) {
+      assert.deepEqual(Object.keys(translation.legal[section]), ["title", "body"], `${lng}: legal.${section}`);
+    }
   }
 });
 
