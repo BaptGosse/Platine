@@ -293,10 +293,12 @@ jobs:
         with:
           version: ${{ env.TRIVY_VERSION }}
           cache: true
-      - name: Full report for the Security tab
+      # Fixable issues of every severity. Debian CVEs without a fix stay out of the tab: nothing to do
+      # about them until Debian ships one, which `apt-get upgrade` then picks up at the next build.
+      - name: Report for the Security tab
         run: >-
           trivy image --config trivy.yaml --scanners vuln,secret --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
-          --ignore-unfixed=false --exit-code 0 --format sarif --output trivy-image.sarif platine:scan
+          --exit-code 0 --format sarif --output trivy-image.sarif platine:scan
       - uses: github/codeql-action/upload-sarif@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
         if: ${{ !cancelled() && !github.event.pull_request.head.repo.fork }}
         with:

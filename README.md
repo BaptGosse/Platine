@@ -249,8 +249,8 @@ make fmt                # fixes the style
   image, the Dockerfile or the chart, and on leaked secrets. Settings live in `trivy.yaml`, and every accepted
   finding is listed with its reason in `.trivyignore` and `trivy-secret.yaml`. The image drops pip and applies
   the Debian security updates at build time.
-- **CI**: every push runs all of the above, validates the chart with kubeconform, sends the full Trivy reports
-  to the GitHub Security tab, publishes the coverage reports to <https://baptgosse.github.io/Platine/>, and
+- **CI**: every push runs all of the above, validates the chart with kubeconform, sends every issue Trivy can
+  see a fix for to the GitHub Security tab, publishes the coverage reports to <https://baptgosse.github.io/Platine/>, and
   on `main` releases the image (once it passed the scan), the chart and a GitHub release (see
   [Releases](#releases)).
 
