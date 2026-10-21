@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.title="Platine" \
       org.opencontainers.image.url="https://github.com/BaptGosse/Platine" \
       org.opencontainers.image.licenses="MIT"
 
-COPY --from=ghcr.io/astral-sh/uv:0.13.3 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.4 /uv /uvx /bin/
 
 # Everything written at runtime goes to /tmp: the rest can be read-only.
 # The venv is on PATH so yt-dlp finds the `deno` binary installed alongside it.
