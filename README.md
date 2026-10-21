@@ -247,8 +247,8 @@ make fmt                # fixes the style
   `main.js` (browser bootstrap) and `sw.js` (service worker) are checked in a real browser instead.
 - **Security**: Trivy fails the build on any HIGH or CRITICAL issue that has a fix, in the dependencies, the
   image, the Dockerfile or the chart, and on leaked secrets. Settings live in `trivy.yaml`, and every accepted
-  finding is listed with its reason in `.trivyignore` and `trivy-secret.yaml`. The image drops pip and applies
-  the Debian security updates at build time.
+  finding is listed with its reason in `.trivyignore` and `trivy-secret.yaml`. The image is built in two stages, so
+  the compiler and uv stay out of it, drops pip and applies the Debian security updates at build time.
 - **CI**: every push runs all of the above, validates the chart with kubeconform, sends every issue Trivy can
   see a fix for to the GitHub Security tab, publishes the coverage reports to <https://baptgosse.github.io/Platine/>, and
   on `main` releases the image (once it passed the scan), the chart and a GitHub release (see
